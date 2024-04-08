@@ -16,6 +16,80 @@ client = Client(
     key_id ='0cf980f9-364e-44a5-9471-8ac8ec5fb6ff',
     api_key = 'XLMyd6F1Zs92SedNfGCrEs4a2l2oHnNwnMQx1YPxN9h2TZXR23gwz8avWYN7')
 
+def printDailyPowerUsage():
+    #Print formatted daily usage list
+    num = 0
+    dateBuff = "None"
+    dailyTotal = 0
+    runningTotal = 0
+    for x in keyList:
+        date = keyList[num].strftime('%m/%d/%Y %H:%M:%S')
+        if date[:10] != dateBuff[:10]:
+            print("Total: ", dailyTotal / 1000)
+            dailyTotal = 0
+            print('=================\n')
+            print(date[:10])
+            print()
+            print(date[11:16], "-- ", usageList[num] / 1000, "KWh")
+            dailyTotal += usageList[num]
+            runningTotal += usageList[num]
+            
+        else:
+            print(date[11:16], "-- ", usageList[num] / 1000, "KWh")
+            dailyTotal += usageList[num]
+            runningTotal += usageList[num]
+
+        num += 1
+        dateBuff = date
+    print("Total: ", dailyTotal / 1000, "KWh")
+    print('=================')
+    print("Comprehensive Total: ", runningTotal / 1000, "KWh")
+
+
+def printMonthlyPowerUsage():
+    # Print formatted monthly usage list
+    num = 0
+    monthBuff = "None"
+    dayBuff = "None"
+    dailyTotal = 0
+    monthlyTotal = 0
+    runningTotal = 0
+    for x in keyList:
+        month = keyList[num].strftime('%m/%Y')
+        day = keyList[num].strftime('%d')
+        if month != monthBuff:
+            print("Total: ", monthlyTotal / 1000)
+            monthlyTotal = 0
+            print('=================\n')
+            print(month)
+            print()
+            if day != dayBuff:
+                print(day, "- total: ", dailyTotal / 1000, "KWh")
+                dailyTotal = 0
+                monthlyTotal += usageList[num]
+                runningTotal += usageList[num]
+            else:
+                dailyTotal += usageList[num]
+                monthlyTotal += usageList[num]
+                runningTotal += usageList[num]
+            dayBuff = day
+        else:
+            if day != dayBuff:
+                print(day, "- total: ", dailyTotal / 1000, "KWh")
+                dailyTotal = 0
+                monthlyTotal += usageList[num]
+                runningTotal += usageList[num]
+            else:
+                dailyTotal += usageList[num]
+                monthlyTotal += usageList[num]
+                runningTotal += usageList[num]
+            dayBuff = day
+        num += 1
+        monthBuff = month
+    print("Total: ", monthlyTotal / 1000, "KWh")
+    print('=================')
+    print("Comprehensive Total: ", runningTotal / 1000, "KWh")
+
 try:
     # DeviceList = client.devices_list()
     # print("====================================\n")
@@ -49,34 +123,43 @@ try:
 
 
     #Assignes electrical usage records to "PlugRecords" Var
-    PlugRecords = client.plugs.get_usage_records(device_mac=outdoorPlug.mac, device_model=outdoorPlug.product.model, start_time=datetime.datetime.fromisoformat('2024-04-06'))
+    PlugRecords = client.plugs.get_usage_records(device_mac=outdoorPlug.mac, device_model=outdoorPlug.product.model, start_time=datetime.datetime.fromisoformat('2023-03-06'))
 
 
+    #Parse the PlugRecords dict
     keyList = []
     usageList = []
+    cycle = 0
+    for rec in PlugRecords:
+        #cache PlugRecords keys
+        index = 1
+        keys = PlugRecords[cycle].hourly_data.keys()
+        for key in keys:
+            temp = [key]
+            keyList += temp
+            index += 1
+        
+        #cache PlugRecords values
+        value = PlugRecords[cycle].hourly_data.values()
+        for i in value:
+            temp = [i]
+            usageList += temp
+        cycle += 1
+        
+    string = keyList[0].strftime('%m/%d/%Y %H:%M:%S')
+    print(type(string))
+    print(string)
+    print(len(PlugRecords))
+    printMonthlyPowerUsage()
 
-    #cache PlugRecords keys
-    index = 1
-    keys = PlugRecords[0].hourly_data.keys()
-    for key in keys:
-        temp = [key]
-        keyList += temp
-        index += 1
-    
-    #cache PlugRecords values
-    value = PlugRecords[0].hourly_data.values()
-    for i in value:
-        temp = [i]
-        usageList += temp
 
-    #Print formatted usage list
-    num = 0
-    for x in keyList:
-        print(num + 1, ": ", keyList[num], " : ", usageList[num])
-        print()
-        num += 1
+
+
+
 
 
 except WyzeApiError as e:
     # You will get a WyzeApiError if the request failed
     print("power: ", plug.is_on)
+
+

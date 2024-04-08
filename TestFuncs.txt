@@ -1,0 +1,105 @@
+def printMonthyPowerUsage():
+    #Print formatted usage list
+    num = 0
+    dateBuff = "None"
+    dailyTotal = 0
+    runningTotal = 0
+    for x in keyList:
+        date = keyList[num].strftime('%m/%d/%Y %H:%M:%S')
+        if date[:10] != dateBuff[:10]:
+            print("Total: ", dailyTotal / 1000)
+            dailyTotal = 0
+            print('=================\n')
+            print(date[:10])
+            print()
+            print(date[11:16], "-- ", usageList[num] / 1000, "KWh")
+            dailyTotal += usageList[num]
+            runningTotal += usageList[num]
+            
+        else:
+            print(date[11:16], "-- ", usageList[num] / 1000, "KWh")
+            dailyTotal += usageList[num]
+            runningTotal += usageList[num]
+
+        num += 1
+        dateBuff = date
+    print("Total: ", dailyTotal / 1000, "KWh")
+    print('=================')
+    print("Comprehensive Total: ", runningTotal / 1000, "KWh")
+
+
+
+
+#Prints monthly formatted with hourly totals
+def printMonthlyPowerUsage():
+    # Print formatted monthly usage list
+    num = 0
+    monthBuff = "None"
+    monthlyTotal = 0
+    runningTotal = 0
+    for x in keyList:
+        month = keyList[num].strftime('%m/%Y')
+        if month != monthBuff:
+            print("Total: ", monthlyTotal / 1000)
+            monthlyTotal = 0
+            print('=================\n')
+            print(month)
+            print()
+            print(keyList[num].strftime('%m/%d/%Y %H:%M:%S'), "-- ", usageList[num] / 1000, "KWh")
+            monthlyTotal += usageList[num]
+            runningTotal += usageList[num]
+        else:
+            print(keyList[num].strftime('%m/%d/%Y %H:%M:%S'), "-- ", usageList[num] / 1000, "KWh")
+            monthlyTotal += usageList[num]
+            runningTotal += usageList[num]
+        num += 1
+        monthBuff = month
+    print("Total: ", monthlyTotal / 1000, "KWh")
+    print('=================')
+    print("Comprehensive Total: ", runningTotal / 1000, "KWh")
+
+
+#print monthy formatted with daily totals
+def printMonthlyPowerUsage():
+    # Print formatted monthly usage list
+    num = 0
+    monthBuff = "None"
+    dayBuff = "None"
+    dailyTotal = 0
+    monthlyTotal = 0
+    runningTotal = 0
+    for x in keyList:
+        month = keyList[num].strftime('%m/%Y')
+        day = keyList[num].strftime('%d')
+        if month != monthBuff:
+            print("Total: ", monthlyTotal / 1000)
+            monthlyTotal = 0
+            print('=================\n')
+            print(month)
+            print()
+            if day != dayBuff:
+                print(day, "- total: ", dailyTotal / 1000, "KWh")
+                dailyTotal = 0
+                monthlyTotal += usageList[num]
+                runningTotal += usageList[num]
+            else:
+                dailyTotal += usageList[num]
+                monthlyTotal += usageList[num]
+                runningTotal += usageList[num]
+            dayBuff = day
+        else:
+            if day != dayBuff:
+                print(day, "- total: ", dailyTotal / 1000, "KWh")
+                dailyTotal = 0
+                monthlyTotal += usageList[num]
+                runningTotal += usageList[num]
+            else:
+                dailyTotal += usageList[num]
+                monthlyTotal += usageList[num]
+                runningTotal += usageList[num]
+            dayBuff = day
+        num += 1
+        monthBuff = month
+    print("Total: ", monthlyTotal / 1000, "KWh")
+    print('=================')
+    print("Comprehensive Total: ", runningTotal / 1000, "KWh")
