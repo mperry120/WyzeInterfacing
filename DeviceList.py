@@ -28,8 +28,6 @@ try:
     # print("\n====================================\n")
 
 
-    print("\n====================================\n")
-
     # plug = client.plugs.info(device_mac='7C78B2647DD3-0002')
     # print("power: ", plug.is_on)
     # print("online: ", plug.is_online)
@@ -50,36 +48,33 @@ try:
     outdoorPlug = client.plugs.info(device_mac='7C78B2647DD3')
 
 
-    #Assignes electrical records to "PlugRecords" Var
+    #Assignes electrical usage records to "PlugRecords" Var
     PlugRecords = client.plugs.get_usage_records(device_mac=outdoorPlug.mac, device_model=outdoorPlug.product.model, start_time=datetime.datetime.fromisoformat('2024-04-06'))
 
-    print("\n====================================\n")
 
-    pprint.pprint(PlugRecords[0].hourly_data)
+    keyList = []
+    usageList = []
 
-    print("\n====================================\n")
+    #cache PlugRecords keys
+    index = 1
+    keys = PlugRecords[0].hourly_data.keys()
+    for key in keys:
+        temp = [key]
+        keyList += temp
+        index += 1
+    
+    #cache PlugRecords values
+    value = PlugRecords[0].hourly_data.values()
+    for i in value:
+        temp = [i]
+        usageList += temp
 
-
-    print("TESTING SECTION")
-    print(list(PlugRecords[0].hourly_data.values()))
-    print("TESTING SECTION")
-
-
-    print("\n====================================\n")
-    #Format and print PlugRecords
-    i = 1
-    for record in PlugRecords:
-        print("Record ", i, ":")
-        print(record.to_dict())
+    #Print formatted usage list
+    num = 0
+    for x in keyList:
+        print(num + 1, ": ", keyList[num], " : ", usageList[num])
         print()
-        i += 1
-    print("\n====================================\n")
-
-    print("Record type:")
-    print(type(PlugRecords[0]))
-
-
-
+        num += 1
 
 
 except WyzeApiError as e:
