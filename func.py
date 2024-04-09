@@ -1,0 +1,132 @@
+from collections import defaultdict
+import datetime
+import wyze_sdk
+from wyze_sdk import Client
+from wyze_sdk.errors import WyzeApiError
+
+
+client = Client(
+    email = 'mperry120@gmail.com',
+    password = 'ziJfym-fodsaq-ribwo6',
+    key_id ='0cf980f9-364e-44a5-9471-8ac8ec5fb6ff',
+    api_key = 'XLMyd6F1Zs92SedNfGCrEs4a2l2oHnNwnMQx1YPxN9h2TZXR23gwz8avWYN7')
+
+#Querie for AC plug
+outdoorPlug = client.plugs.info(device_mac='7C78B2647DD3')
+
+def printDaily():
+    #Assignes electrical usage records to "PlugRecords" Var
+    PlugRecords = client.plugs.get_usage_records(device_mac=outdoorPlug.mac, device_model=outdoorPlug.product.model, start_time=datetime.datetime.fromisoformat('2024-03-31'))
+
+    newDict = defaultdict(int)
+
+    #make list
+    for wyzeRec in PlugRecords:
+        #aggragate data
+        for date, value in wyzeRec.hourly_data.items():
+            day = date.date()
+            newDict[day] += value
+    #print data
+    for key, value in newDict.items():
+        string = key.strftime('%m/%d/%Y')
+        print(string, ':', value)
+
+
+def printMonthlyPowerUsage():
+    # Print formatted monthly usage list
+    num = 0
+    monthBuff = "None"
+    dayBuff = "None"
+    dailyTotal = 0
+    monthlyTotal = 0
+    runningTotal = 0
+    for x in keyList:
+        #change below code to:
+        # month = x.strftime('%m/%Y')
+        # day = x.strftime('%d')
+        month = keyList[num].strftime('%m/%Y')
+        day = keyList[num].strftime('%d')
+        if month != monthBuff:
+            if num != 0:
+                print("Total: ", monthlyTotal / 1000)
+            monthlyTotal = 0
+            print('=================\n')
+            print(month, day)
+            print()
+            if day != dayBuff:
+                print(day, "- total(from new month): ", dailyTotal / 1000, "KWh")
+                dailyTotal = 0
+            monthlyTotal += usageList[num]
+            runningTotal += usageList[num]
+            dayBuff = day
+        else:
+            if day != dayBuff:
+                print(day, "- total(from daily tally): ", dailyTotal / 1000, "KWh")
+                dailyTotal = 0
+            dailyTotal += usageList[num]
+            monthlyTotal += usageList[num]
+            runningTotal += usageList[num]
+            dayBuff = day
+        num += 1
+        monthBuff = month
+    print("Total: ", monthlyTotal / 1000, "KWh")
+    print('=================')
+    print("Comprehensive Total: ", runningTotal / 1000, "KWh")
+
+
+def printHourlyPowerUsage():
+    # Print formatted monthly usage list
+    num = 0
+    monthBuff = "None"
+    monthlyTotal = 0
+    runningTotal = 0
+    for x in keyList:
+        month = keyList[num].strftime('%m/%Y')
+        if month != monthBuff:
+            print("Total: ", monthlyTotal / 1000)
+            monthlyTotal = 0
+            print('=================\n')
+            print(month)
+            print()
+            print(keyList[num].strftime('%m/%d/%Y %H:%M:%S'), "-- ", usageList[num] / 1000, "KWh")
+            monthlyTotal += usageList[num]
+            runningTotal += usageList[num]
+        else:
+            print(keyList[num].strftime('%m/%d/%Y %H:%M:%S'), "-- ", usageList[num] / 1000, "KWh")
+            monthlyTotal += usageList[num]
+            runningTotal += usageList[num]
+        num += 1
+        monthBuff = month
+    print("Total: ", monthlyTotal / 1000, "KWh")
+    print('=================')
+    print("Comprehensive Total: ", runningTotal / 1000, "KWh")
+
+
+def printDailyPowerUsage():
+    #Print formatted daily usage list
+    num = 0
+    dateBuff = "None"
+    dailyTotal = 0
+    runningTotal = 0
+    for x in keyList:
+        date = keyList[num].strftime('%m/%d/%Y %H:%M:%S')
+        if date[:10] != dateBuff[:10]:
+            print("Total: ", dailyTotal / 1000)
+            dailyTotal = 0
+            print('=================\n')
+            print(date[:10])
+            print()
+            print(date[11:16], "-- ", usageList[num] / 1000, "KWh")
+            dailyTotal += usageList[num]
+            runningTotal += usageList[num]
+            
+        else:
+            print(date[11:16], "-- ", usageList[num] / 1000, "KWh")
+            dailyTotal += usageList[num]
+            runningTotal += usageList[num]
+
+        num += 1
+        dateBuff = date
+    print("Total: ", dailyTotal / 1000, "KWh")
+    print('=================')
+    print("Comprehensive Total: ", runningTotal / 1000, "KWh")
