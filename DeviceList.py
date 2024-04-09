@@ -3,6 +3,7 @@ import datetime
 import time
 import calendar
 import pprint
+from collections import defaultdict
 from datetime import timedelta
 from wyze_sdk import Client
 from wyze_sdk.errors import WyzeApiError
@@ -46,6 +47,26 @@ def printDailyPowerUsage():
     print("Comprehensive Total: ", runningTotal / 1000, "KWh")
 
 
+def printDaily():
+    num = 0
+    for x in keyList:
+        #make list
+        theList = []
+
+
+def testFunc():
+    newDict = defaultdict(int)
+
+    #make list
+    for dict in PlugRecords:
+        for date, value in dict.items():
+            day = date.date()
+            newDict[day] += value
+
+        for key, value in dict.items():
+            string = key.strftime('%m/%d/%Y')
+            print(string, ':', value)
+
 def printMonthlyPowerUsage():
     # Print formatted monthly usage list
     num = 0
@@ -55,35 +76,59 @@ def printMonthlyPowerUsage():
     monthlyTotal = 0
     runningTotal = 0
     for x in keyList:
+        #change below code to:
+        # month = x.strftime('%m/%Y')
+        # day = x.strftime('%d')
         month = keyList[num].strftime('%m/%Y')
         day = keyList[num].strftime('%d')
+        if month != monthBuff:
+            if num != 0:
+                print("Total: ", monthlyTotal / 1000)
+            monthlyTotal = 0
+            print('=================\n')
+            print(month, day)
+            print()
+            if day != dayBuff:
+                print(day, "- total(from new month): ", dailyTotal / 1000, "KWh")
+                dailyTotal = 0
+            monthlyTotal += usageList[num]
+            runningTotal += usageList[num]
+            dayBuff = day
+        else:
+            if day != dayBuff:
+                print(day, "- total(from daily tally): ", dailyTotal / 1000, "KWh")
+                dailyTotal = 0
+            dailyTotal += usageList[num]
+            monthlyTotal += usageList[num]
+            runningTotal += usageList[num]
+            dayBuff = day
+        num += 1
+        monthBuff = month
+    print("Total: ", monthlyTotal / 1000, "KWh")
+    print('=================')
+    print("Comprehensive Total: ", runningTotal / 1000, "KWh")
+
+def printHourlyPowerUsage():
+    # Print formatted monthly usage list
+    num = 0
+    monthBuff = "None"
+    monthlyTotal = 0
+    runningTotal = 0
+    for x in keyList:
+        month = keyList[num].strftime('%m/%Y')
         if month != monthBuff:
             print("Total: ", monthlyTotal / 1000)
             monthlyTotal = 0
             print('=================\n')
             print(month)
             print()
-            if day != dayBuff:
-                print(day, "- total: ", dailyTotal / 1000, "KWh")
-                dailyTotal = 0
-                monthlyTotal += usageList[num]
-                runningTotal += usageList[num]
-            else:
-                dailyTotal += usageList[num]
-                monthlyTotal += usageList[num]
-                runningTotal += usageList[num]
-            dayBuff = day
+            print(keyList[num].strftime('%m/%d/%Y %H:%M:%S'), "-- ", usageList[num] / 1000, "KWh")
+            monthlyTotal += usageList[num]
+            runningTotal += usageList[num]
         else:
-            if day != dayBuff:
-                print(day, "- total: ", dailyTotal / 1000, "KWh")
-                dailyTotal = 0
-                monthlyTotal += usageList[num]
-                runningTotal += usageList[num]
-            else:
-                dailyTotal += usageList[num]
-                monthlyTotal += usageList[num]
-                runningTotal += usageList[num]
-            dayBuff = day
+            print(keyList[num].strftime('%m/%d/%Y %H:%M:%S'), "-- ", usageList[num] / 1000, "KWh")
+            monthlyTotal += usageList[num]
+            runningTotal += usageList[num]
         num += 1
         monthBuff = month
     print("Total: ", monthlyTotal / 1000, "KWh")
@@ -123,7 +168,7 @@ try:
 
 
     #Assignes electrical usage records to "PlugRecords" Var
-    PlugRecords = client.plugs.get_usage_records(device_mac=outdoorPlug.mac, device_model=outdoorPlug.product.model, start_time=datetime.datetime.fromisoformat('2023-03-06'))
+    PlugRecords = client.plugs.get_usage_records(device_mac=outdoorPlug.mac, device_model=outdoorPlug.product.model, start_time=datetime.datetime.fromisoformat('2024-03-31'))
 
 
     #Parse the PlugRecords dict
@@ -132,6 +177,7 @@ try:
     cycle = 0
     for rec in PlugRecords:
         #cache PlugRecords keys
+        #delete index
         index = 1
         keys = PlugRecords[cycle].hourly_data.keys()
         for key in keys:
@@ -150,9 +196,15 @@ try:
     print(type(string))
     print(string)
     print(len(PlugRecords))
+    printHourlyPowerUsage()
     printMonthlyPowerUsage()
-
-
+    print("====================================\n") 
+    for x in PlugRecords:
+        print()
+        pprint.pprint(x)
+    
+    print("-------------set--------------")
+    testFunc()
 
 
 

@@ -1,12 +1,23 @@
 import os
 import datetime
+import pprint
+from collections import defaultdict
 from datetime import timedelta
 
-test = ["this", "that", "Hear", "There"]
+theDict = {
+    datetime.datetime(2024, 4, 1, 1, 0, 0): 1,
+    datetime.datetime(2024, 4, 1, 2, 0, 0): 2,
+    datetime.datetime(2024, 4, 2, 1, 0, 0): 3,
+    datetime.datetime(2024, 4, 2, 2, 0, 0): 4
+}
 
-print("\n=============================\n")
+newDict = defaultdict(int)
 
-print(type(test))
-print(test[:])
+#make list
+for date, value in theDict.items():
+    day = date.date()
+    newDict[day] += value
 
-print("\n=============================\n")
+for key, value in newDict.items():
+    string = key.strftime('%m/%d/%Y')
+    print(string, ':', value)
