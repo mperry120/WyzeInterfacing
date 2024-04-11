@@ -11,6 +11,7 @@ from datetime import timedelta
 leftPlugMac = '7C78B2647DD3-0002'
 leftPlugModel = 'WLPPO-SUB'
 
+pullDate = '2024-03-15'
 
 try:
     # DeviceList = client.devices_list()
@@ -73,7 +74,8 @@ try:
     # print(len(PlugRecords))
 
     print("-------------set--------------")
-    func.printDaily()
+    func.printDaily(pullDate)
+    func.printMonthly(pullDate)
 
 
 

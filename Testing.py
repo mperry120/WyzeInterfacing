@@ -4,6 +4,20 @@ import pprint
 from collections import defaultdict
 from datetime import timedelta
 
+from tkinter import *
+from tkinter import ttk
+
+root = Tk()
+root.geometry("500x450")
+
+button1 = Button(root, text = 'Click for tiddies')
+button2 = ttk.Button(root, text = 'Click for tiddies')
+button1.pack()
+button2.pack()
+
+
+root.mainloop()
+
 theDict = {
     datetime.datetime(2024, 4, 1, 1, 0, 0): 1,
     datetime.datetime(2024, 4, 1, 2, 0, 0): 2,

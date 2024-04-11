@@ -14,14 +14,17 @@ client = Client(
 #Querie for AC plug
 outdoorPlug = client.plugs.info(device_mac='7C78B2647DD3')
 
-def printDaily():
+#Passes string literal date in the format of: '2024-03-31'
+def getUsageData(date):
     #Assignes electrical usage records to "PlugRecords" Var
-    PlugRecords = client.plugs.get_usage_records(device_mac=outdoorPlug.mac, device_model=outdoorPlug.product.model, start_time=datetime.datetime.fromisoformat('2024-03-31'))
+    PlugRecords = client.plugs.get_usage_records(device_mac=outdoorPlug.mac, device_model=outdoorPlug.product.model, start_time=datetime.datetime.fromisoformat(date))
+    return PlugRecords
 
+def printDaily(date):
+    plugRecs = getUsageData(date)
     newDict = defaultdict(int)
-
     #make list
-    for wyzeRec in PlugRecords:
+    for wyzeRec in plugRecs:
         #aggragate data
         for date, value in wyzeRec.hourly_data.items():
             day = date.date()
@@ -29,7 +32,26 @@ def printDaily():
     #print data
     for key, value in newDict.items():
         string = key.strftime('%m/%d/%Y')
-        print(string, ':', value)
+        print(f"{string}:{value / 1000} KWh")
+
+
+def printMonthly(date):
+    plugRecs = getUsageData(date)
+    newDict = defaultdict(int)
+    #make list
+    for wyzeRec in plugRecs:
+        #aggragate data
+        for date, value in wyzeRec.hourly_data.items():
+            month_year = (date.year, date.month)
+            newDict[month_year] += value
+    #print data
+    for key, value in newDict.items():
+        year, month = key
+        string = datetime.datetime(year, month, 1).strftime('%m/%Y')
+        print(f"{string}:{value / 1000} KWh")
+
+
+
 
 
 def printMonthlyPowerUsage():
