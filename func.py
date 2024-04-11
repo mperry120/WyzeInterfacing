@@ -35,6 +35,28 @@ def printDaily(date):
         print(f"{string}:{value / 1000} KWh")
 
 
+#TESTING
+
+def printDailyString(date):
+    plugRecs = getUsageData(date)
+    newDict = defaultdict(int)
+    rtrnString = ''
+    #make list
+    for wyzeRec in plugRecs:
+        #aggragate data
+        for date, value in wyzeRec.hourly_data.items():
+            day = date.date()
+            newDict[day] += value
+    #print data
+    for key, value in newDict.items():
+        string = key.strftime('%m/%d/%Y')
+        rtrnString += (f"{string}: {value / 1000} KWh\n")
+    return rtrnString
+
+
+#TESTING
+
+
 def printMonthly(date):
     plugRecs = getUsageData(date)
     newDict = defaultdict(int)

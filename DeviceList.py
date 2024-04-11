@@ -8,6 +8,8 @@ from wyze_sdk.errors import WyzeApiError
 from datetime import timedelta
 
 
+
+
 leftPlugMac = '7C78B2647DD3-0002'
 leftPlugModel = 'WLPPO-SUB'
 
@@ -84,5 +86,7 @@ try:
 except WyzeApiError as e:
     # You will get a WyzeApiError if the request failed
     print("power: ", plug.is_on)
+
+
 
 
