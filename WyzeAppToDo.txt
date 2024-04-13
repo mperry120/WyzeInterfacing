@@ -1,0 +1,22 @@
+Wyze interface app:
+
+*Choose the start date from which data aggregation begins.
+
+*Choose format of aggregated data:
+	*Monthly usage
+	*Daily usage
+	*Hourly usage
+
+*Populate new window with data
+
+*Text editor for collating usage history.
+
+*Ability to save data
+
+*Generate graphs
+
+*(maybe) link to the Wyze API key generation site.
+
+*Enter account info (log in) and remember is desired.
+
+*I like the tabs widget

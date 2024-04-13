@@ -26,7 +26,7 @@ class Window(QWidget):
         self.spinBox.setSuffix("% ")
         self.spinBox.setSingleStep(5)
         self.spinBox.valueChanged.connect(self.getVal)
-        button = QPushButton("send", self)
+        button = QPushButton("send it!", self)
         button.move(150, 150)
         button.clicked.connect(self.getVal)
 
