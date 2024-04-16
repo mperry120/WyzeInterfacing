@@ -5,7 +5,6 @@ import time
 import calendar
 import pprint
 import func
-import SaveData
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import Qt
 from wyze_sdk.errors import WyzeApiError
@@ -30,61 +29,104 @@ try:
             super().__init__()
             self.setWindowTitle("Wyze Data Portal")
             self.setGeometry(350,150,400,400)
+            self.setContentsMargins(20,20,20,20)
             self.UI()
 
         def UI(self):
             mainLayout = QVBoxLayout()
             TopLayout = QVBoxLayout()
-            BottomLayout = QHBoxLayout()
+            BottomLayout = QVBoxLayout()
             mainLayout.addLayout(TopLayout)
             mainLayout.addLayout(BottomLayout)
 
             self.email = QLineEdit()
             self.email.setPlaceholderText("Email")
-            password = QLineEdit()
-            password.setPlaceholderText("Password")
+            self.email.setFixedWidth(200)
+            self.password = QLineEdit()
+            self.password.setPlaceholderText("Password")
+            self.password.setEchoMode(QLineEdit.EchoMode.Password)
+            self.password.setFixedWidth(200)
             key_id = QLineEdit()
             key_id.setPlaceholderText("Key ID")
+            key_id.setFixedWidth(200)
             api_key = QLineEdit()
             api_key.setPlaceholderText("API Key")
+            api_key.setFixedWidth(200)
             button = QPushButton("Enter")
-            TopLayout.addStretch()
-            TopLayout.addWidget(QLabel("Enter your Wyze credentials:"), alignment=Qt.AlignmentFlag.AlignCenter)
 
-            TopLayout.addWidget(self.email, alignment=Qt.AlignmentFlag.AlignCenter)
-            TopLayout.addWidget(password, alignment=Qt.AlignmentFlag.AlignCenter)
-            TopLayout.addWidget(key_id, alignment=Qt.AlignmentFlag.AlignCenter)
-            TopLayout.addWidget(api_key, alignment=Qt.AlignmentFlag.AlignCenter)
-            TopLayout.addStretch()
+
+            ThBox1 = QHBoxLayout()
+            ThBox2 = QHBoxLayout()
+            ThBox3 = QHBoxLayout()
+            ThBox4 = QHBoxLayout()
+            ThBox5 = QHBoxLayout()
             
+            ThBox1.addWidget(QLabel("Enter your Wyze credentials:"), alignment=Qt.AlignmentFlag.AlignCenter)
+            ThBox2.addWidget(self.email, alignment=Qt.AlignmentFlag.AlignCenter)
+            ThBox3.addWidget(self.password, alignment=Qt.AlignmentFlag.AlignCenter)
+            ThBox4.addWidget(key_id, alignment=Qt.AlignmentFlag.AlignCenter)
+            ThBox5.addWidget(api_key, alignment=Qt.AlignmentFlag.AlignCenter)
+
+            TopLayout.addLayout(ThBox1)
+            TopLayout.addLayout(ThBox2)
+            TopLayout.addLayout(ThBox3)
+            TopLayout.addLayout(ThBox4)
+            TopLayout.addLayout(ThBox5)
+            TopLayout.setAlignment(Qt.AlignmentFlag.AlignBottom)            
+
+            hBox = QHBoxLayout()
+            BottomLayout.addLayout(hBox)
+
             self.rememberMe = QCheckBox("Remember Me")
-            BottomLayout.addWidget(self.rememberMe, alignment=Qt.AlignmentFlag.AlignRight)
-            BottomLayout.addWidget(button, alignment=Qt.AlignmentFlag.AlignLeft)
-            
+            hBox.addWidget(self.rememberMe, alignment=Qt.AlignmentFlag.AlignRight)
+            hBox.addWidget(button, alignment=Qt.AlignmentFlag.AlignLeft)
+            BottomLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
             button.clicked.connect(self.pressEnter)
 
-            self.rememberMe.isChecked
 
-            # hBox = QHBoxLayout()
 
-            # BottomLayout.addLayout(hBox)
 
-            # hBox.addStretch()
-            # hBox.addWidget(QCheckBox("Remember Me"))
-            # hBox.addWidget(button)
-            # hBox.addStretch()
+            f = open("SaveData.txt")
+            if f.read() != "":
+                content = f.readlines()
+                self.email.setText(content[0])
+                self.password.setText(content[1])
+                print(content)
+                f.close()
+            else:
+                f.close()
+
+
+
+
+
+            # f = open("SaveData.txt", "r")
+            # self.email.setText(f.read())
+            # f.close()
             
-            # BottomLayout.addStretch()
 
-            self.email.setText(SaveData.email)
+
             self.setLayout(mainLayout)
             self.show()
 
         def pressEnter(self):
             if self.rememberMe.isChecked():
-                SaveData.saveData(self.email.text())
+                f = open("SaveData.txt", "w")
+                f.write(self.email.text(), "\n")
+                f.write(self.password.text(), "\n")
+                f.close()
+            else:
+                f = open("SaveData.txt", "w")
+                f.write("")
+                f.close()
             
+
+#I what the remember me checkbox to stay checked if the user has checked it before
+
+
+
+
             # password = password.text()
             # key_id = key_id.text()
             # api_key = api_key.text()
