@@ -22,3 +22,30 @@ for datetime_obj, value in theDict.items():
 newDict = dict(newDict)
 
 print(newDict)
+
+
+    #Parse the PlugRecords dict
+    # keyList = []
+    # usageList = []
+    # cycle = 0
+    # for rec in PlugRecords:
+    #     #cache PlugRecords keys
+    #     #delete index
+    #     index = 1
+    #     keys = PlugRecords[cycle].hourly_data.keys()
+    #     for key in keys:
+    #         temp = [key]
+    #         keyList += temp
+    #         index += 1
+        
+    #     #cache PlugRecords values
+    #     value = PlugRecords[cycle].hourly_data.values()
+    #     for i in value:
+    #         temp = [i]
+    #         usageList += temp
+    #     cycle += 1
+        
+    # string = keyList[0].strftime('%m/%d/%Y %H:%M:%S')
+    # print(type(string))
+    # print(string)
+    # print(len(PlugRecords))

@@ -1,5 +1,6 @@
 import sys
-from PyQt5.QtWidgets import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import Qt
 
 
 class Window(QWidget):
@@ -15,10 +16,11 @@ class Window(QWidget):
         button2=QPushButton("Button2")
         button3=QPushButton("Button3")
         hbox.addStretch()
-        hbox.addWidget(button1)
-        hbox.addWidget(button2)
-        hbox.addWidget(button3)
+        hbox.addWidget(button1, alignment=Qt.AlignmentFlag.AlignRight)
+        hbox.addWidget(button2, alignment=Qt.AlignmentFlag.AlignCenter)
+        hbox.addWidget(button3, alignment=Qt.AlignmentFlag.AlignLeft)
         hbox.addStretch()
+
         self.setLayout(hbox)
         self.show()
 
@@ -26,7 +28,7 @@ class Window(QWidget):
 def main():
     App=QApplication(sys.argv)
     window = Window()
-    sys.exit(App.exec_())
+    sys.exit(App.exec())
 
 if __name__=='__main__':
     main()

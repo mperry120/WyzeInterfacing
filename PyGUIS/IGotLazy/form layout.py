@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import *
+from PyQt6.QtWidgets import *
 
 
 class Window(QWidget):
@@ -10,7 +10,10 @@ class Window(QWidget):
         self.UI()
 
     def UI(self):
+        vbox = QVBoxLayout()
+        
         formLayout=QFormLayout()
+        formLayout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.FieldsStayAtSizeHint)
         # formLayout.setRowWrapPolicy(QFormLayout.WrapAllRows)
         name_txt=QLabel("Name: ")
         name_input=QLineEdit()
@@ -40,7 +43,7 @@ class Window(QWidget):
 def main():
     App=QApplication(sys.argv)
     window = Window()
-    sys.exit(App.exec_())
+    sys.exit(App.exec())
 
 if __name__=='__main__':
     main()

@@ -174,3 +174,29 @@ def printDailyPowerUsage():
     print("Total: ", dailyTotal / 1000, "KWh")
     print('=================')
     print("Comprehensive Total: ", runningTotal / 1000, "KWh")
+
+def getDeviceList():
+    DeviceList = client.devices_list()
+    print("====================================\n")
+    for device in client.devices_list():
+        print(f"mac: {device.mac}")
+        print(f"nickname: {device.nickname}")
+        print(f"is_online: {device.is_online}")
+        print(f"product model: {device.product.model}")
+        print()
+    print("\n====================================\n")
+
+
+# Need to pass in device_mac
+# plug = client.plugs.info(device_mac='7C78B2647DD3-0002')
+# print("power: ", plug.is_on)
+# print("online: ", plug.is_online)
+
+# if plug.is_on:
+#     client.plugs.turn_off(device_mac=plug.mac, device_model=plug.product.model)
+#     print("Turned the plug off")
+# else:
+#     client.plugs.turn_on(device_mac=plug.mac, device_model=plug.product.model)
+#     print("Turned the plug on")
+# plug = client.plugs.info(device_mac='7C78B2647DD3-0002')
+# print(f"power: {plug.is_on}")
