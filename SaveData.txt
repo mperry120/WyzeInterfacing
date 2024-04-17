@@ -1,5 +1,5 @@
 email: mperry120@gmail.com
-password: unknown
-key_id: unknown
-api_key: unknown
+password: password
+key_id: none
+api_key: n/a
 rememberMe: true

@@ -7,6 +7,7 @@ import pprint
 import func
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QFont
 from wyze_sdk.errors import WyzeApiError
 from datetime import timedelta
 
@@ -20,9 +21,32 @@ pullDate = '2024-03-15'
     # key_id ='0cf980f9-364e-44a5-9471-8ac8ec5fb6ff',
     # api_key = 'XLMyd6F1Zs92SedNfGCrEs4a2l2oHnNwnMQx1YPxN9h2TZXR23gwz8avWYN7')
 
+font = QFont("Times", 16)
+
 
 try:
 
+    #figure out how to make a scroll bar appear when the list gets too long instead of resizing the window
+    class newWindow(QWidget):
+        def __init__(self):
+            super().__init__()
+            self.setWindowTitle("Wyze Data Portal - Device List")
+            self.setGeometry(350,150,400,400)
+            self.setContentsMargins(20,20,20,20)
+            mainLayout = QHBoxLayout()
+            leftLayout = QVBoxLayout()
+            rightLayout = QVBoxLayout()
+            self.label = QLabel("Device List window")
+            self.label.setFont(font)
+            for i in range(0, 20):
+                label = QLabel(f"Device {i}")
+                label.setFont(font)
+                leftLayout.addWidget(label)
+                label.setFont(font)
+            
+            mainLayout.addLayout(leftLayout)
+            mainLayout.addLayout(rightLayout)
+            self.setLayout(mainLayout)
 
     class Window(QWidget):
         def __init__(self):
@@ -115,8 +139,13 @@ try:
                 f = open("SaveData.txt", "w")
                 f.write("")
                 f.close()
+            self.deviceListWindow = newWindow()
+            self.deviceListWindow.show()
+            #Seems to work, but I'm not sure if it's the best way to do it
+            self.window().close()
+            
+        
 
-            print(self.email.text())
 
     def main():
         App=QApplication(sys.argv)
