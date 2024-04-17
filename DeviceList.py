@@ -46,12 +46,12 @@ try:
             self.password.setPlaceholderText("Password")
             self.password.setEchoMode(QLineEdit.EchoMode.Password)
             self.password.setFixedWidth(200)
-            key_id = QLineEdit()
-            key_id.setPlaceholderText("Key ID")
-            key_id.setFixedWidth(200)
-            api_key = QLineEdit()
-            api_key.setPlaceholderText("API Key")
-            api_key.setFixedWidth(200)
+            self.key_id = QLineEdit()
+            self.key_id.setPlaceholderText("Key ID")
+            self.key_id.setFixedWidth(200)
+            self.api_key = QLineEdit()
+            self.api_key.setPlaceholderText("API Key")
+            self.api_key.setFixedWidth(200)
             button = QPushButton("Enter")
 
 
@@ -64,8 +64,8 @@ try:
             ThBox1.addWidget(QLabel("Enter your Wyze credentials:"), alignment=Qt.AlignmentFlag.AlignCenter)
             ThBox2.addWidget(self.email, alignment=Qt.AlignmentFlag.AlignCenter)
             ThBox3.addWidget(self.password, alignment=Qt.AlignmentFlag.AlignCenter)
-            ThBox4.addWidget(key_id, alignment=Qt.AlignmentFlag.AlignCenter)
-            ThBox5.addWidget(api_key, alignment=Qt.AlignmentFlag.AlignCenter)
+            ThBox4.addWidget(self.key_id, alignment=Qt.AlignmentFlag.AlignCenter)
+            ThBox5.addWidget(self.api_key, alignment=Qt.AlignmentFlag.AlignCenter)
 
             TopLayout.addLayout(ThBox1)
             TopLayout.addLayout(ThBox2)
@@ -85,26 +85,13 @@ try:
             button.clicked.connect(self.pressEnter)
 
 
+            self.rememberMe.setChecked(func.get_rememberMe('SaveData.txt'))
 
 
-            f = open("SaveData.txt")
-            if f.read() != "":
-                content = f.readlines()
-                self.email.setText(content[0])
-                self.password.setText(content[1])
-                print(content)
-                f.close()
-            else:
-                f.close()
-
-
-
-
-
-            # f = open("SaveData.txt", "r")
-            # self.email.setText(f.read())
-            # f.close()
-            
+            self.email.setText(func.get_email('SaveData.txt'))
+            self.password.setText(func.get_password('SaveData.txt'))
+            self.key_id.setText(func.get_key_id('SaveData.txt'))
+            self.api_key.setText(func.get_api_key('SaveData.txt'))
 
 
             self.setLayout(mainLayout)
@@ -113,27 +100,23 @@ try:
         def pressEnter(self):
             if self.rememberMe.isChecked():
                 f = open("SaveData.txt", "w")
-                f.write(self.email.text(), "\n")
-                f.write(self.password.text(), "\n")
+                lineToWrite = "email: " + self.email.text() + "\n"
+                f.write(lineToWrite)
+                lineToWrite = "password: " + self.password.text() + "\n"
+                f.write(lineToWrite)
+                lineToWrite = "key_id: " + self.key_id.text() + "\n"
+                f.write(lineToWrite)
+                lineToWrite = "api_key: " + self.api_key.text() + "\n"
+                f.write(lineToWrite)
+                lineToWrite = "rememberMe: true\n"
+                f.write(lineToWrite)
                 f.close()
             else:
                 f = open("SaveData.txt", "w")
                 f.write("")
                 f.close()
-            
 
-#I what the remember me checkbox to stay checked if the user has checked it before
-
-
-
-
-            # password = password.text()
-            # key_id = key_id.text()
-            # api_key = api_key.text()
-            # rememberMe = rememberMe.isChecked()
             print(self.email.text())
-            # SaveData.saveData(email, password, key_id, api_key, rememberMe)
-            # self.close()
 
     def main():
         App=QApplication(sys.argv)

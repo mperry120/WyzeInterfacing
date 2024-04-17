@@ -5,6 +5,7 @@ from wyze_sdk import Client
 from wyze_sdk.errors import WyzeApiError
 
 
+#Will need to create a setter function to pull all these values from the GUI
 client = Client(
     email = 'mperry120@gmail.com',
     password = 'ziJfym-fodsaq-ribwo6',
@@ -200,3 +201,51 @@ def getDeviceList():
 #     print("Turned the plug on")
 # plug = client.plugs.info(device_mac='7C78B2647DD3-0002')
 # print(f"power: {plug.is_on}")
+
+
+#returns state of rememberMe last time user logged in
+def get_rememberMe(filename):
+    with open(filename, 'r') as file:
+        for line in file:
+            if line.startswith('rememberMe:'):
+                rememberMe = line.split(':', 1)[1].strip()
+                if rememberMe == 'true':
+                    return True
+                else:
+                    return False
+    return False
+
+def get_email(filename):
+    with open(filename, 'r') as file:
+        for line in file:
+            # Check if the line starts with 'email:'
+            if line.startswith('email:'):
+                # Extract the email
+                email = line.split(':', 1)[1].strip()
+                return email
+    # If 'email:' is not found in the file
+    return None
+
+def get_password(filename):
+    with open(filename, 'r') as file:
+        for line in file:
+            if line.startswith('password:'):
+                password = line.split(':', 1)[1].strip()
+                return password
+    return None
+
+def get_key_id(filename):
+    with open(filename, 'r') as file:
+        for line in file:
+            if line.startswith('key_id:'):
+                key_id = line.split(':', 1)[1].strip()
+                return key_id
+    return None
+
+def get_api_key(filename):
+    with open(filename, 'r') as file:
+        for line in file:
+            if line.startswith('api_key:'):
+                api_key = line.split(':', 1)[1].strip()
+                return api_key
+    return None
