@@ -21,32 +21,93 @@ pullDate = '2024-03-15'
     # key_id ='0cf980f9-364e-44a5-9471-8ac8ec5fb6ff',
     # api_key = 'XLMyd6F1Zs92SedNfGCrEs4a2l2oHnNwnMQx1YPxN9h2TZXR23gwz8avWYN7')
 
-font = QFont("Times", 16)
+font = QFont("Times", 10)
 
 
 try:
 
-    #figure out how to make a scroll bar appear when the list gets too long instead of resizing the window
+
+    class usageWindow(QWidget):
+        def __init__(self, mac):
+            super().__init__()
+            func.setPlugData(mac)
+            self.setWindowTitle("Wyze Data Portal - Power Usage")
+            self.setGeometry(350,150,600,400)
+            self.setContentsMargins(20,20,20,20)
+            
+            mainLayout = QVBoxLayout()
+            usageText = QTextEdit(self)
+            usageText.setReadOnly(True)
+            usageText.setFont(font)
+            usageText.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            usageText.setText(func.printDaily(pullDate))
+            mainLayout.addWidget(usageText)
+            
+
+            self.setLayout(mainLayout)
+
+            
+
     class newWindow(QWidget):
         def __init__(self):
             super().__init__()
             self.setWindowTitle("Wyze Data Portal - Device List")
-            self.setGeometry(350,150,400,400)
+            self.setGeometry(350,150,600,400)
             self.setContentsMargins(20,20,20,20)
             mainLayout = QHBoxLayout()
             leftLayout = QVBoxLayout()
+            leftLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
             rightLayout = QVBoxLayout()
-            self.label = QLabel("Device List window")
-            self.label.setFont(font)
-            for i in range(0, 20):
-                label = QLabel(f"Device {i}")
-                label.setFont(font)
-                leftLayout.addWidget(label)
-                label.setFont(font)
+            deviceListTitle = QLabel("Device List")
+            deviceListTitle.setFont(font)
+            leftLayout.addWidget(deviceListTitle)
+            deviceListTitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.deviceList = QTextEdit(self)
+            self.deviceList.setFixedWidth(200)
+            self.deviceList.setReadOnly(True)
+            self.deviceList.setFont(font)
+            self.deviceList.setText("Device List")
+            leftLayout.addWidget(self.deviceList)
+            self.deviceList.setText(func.getDeviceList())
+
+            daily = QRadioButton("Daily")
+            weekly = QRadioButton("Weekly")
+            monthly = QRadioButton("Monthly")
+            rightLayout.addWidget(daily)
+            rightLayout.addWidget(weekly)
+            rightLayout.addWidget(monthly)
+
             
+            self.errorLabel = QLabel("")
+            self.errorLabel.setFont(font)
+            self.errorLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            rightLayout.addWidget(self.errorLabel)
+            self.macAddress = QLineEdit(self)
+            self.macAddress.setPlaceholderText("Mac Address")
+
+            
+
+            enterButton = QPushButton("Enter")
+            enterButton.setFont(font)
+
+            rightLayout.addWidget(self.macAddress)
+            rightLayout.addWidget(enterButton)
+            enterButton.clicked.connect(self.getUsageData)
+
             mainLayout.addLayout(leftLayout)
             mainLayout.addLayout(rightLayout)
+            rightLayout.setAlignment(Qt.AlignmentFlag.AlignBottom)
             self.setLayout(mainLayout)
+        
+        def getUsageData(self):
+            if self.macAddress.text() != "":
+                self.usageWindow = usageWindow(self.macAddress.text())
+                self.usageWindow.show()
+            else:
+                self.errorLabel.setText("Please enter a Mac Address")
+            # self.usageWindow = usageWindow()
+            # self.usageWindow.show()
+            # self.window().close()
 
     class Window(QWidget):
         def __init__(self):
@@ -56,12 +117,13 @@ try:
             self.setContentsMargins(20,20,20,20)
             self.UI()
 
+
         def UI(self):
-            mainLayout = QVBoxLayout()
+            self.mainLayout = QVBoxLayout()
             TopLayout = QVBoxLayout()
             BottomLayout = QVBoxLayout()
-            mainLayout.addLayout(TopLayout)
-            mainLayout.addLayout(BottomLayout)
+            self.mainLayout.addLayout(TopLayout)
+            self.mainLayout.addLayout(BottomLayout)
 
             self.email = QLineEdit()
             self.email.setPlaceholderText("Email")
@@ -118,7 +180,7 @@ try:
             self.api_key.setText(func.get_api_key('SaveData.txt'))
 
 
-            self.setLayout(mainLayout)
+            self.setLayout(self.mainLayout)
             self.show()
 
         def pressEnter(self):

@@ -12,12 +12,20 @@ client = Client(
     key_id ='0cf980f9-364e-44a5-9471-8ac8ec5fb6ff',
     api_key = 'XLMyd6F1Zs92SedNfGCrEs4a2l2oHnNwnMQx1YPxN9h2TZXR23gwz8avWYN7')
 
-#Querie for AC plug
-outdoorPlug = client.plugs.info(device_mac='7C78B2647DD3')
+#Set global variables
+outdoorPlug = None
 
-#Passes string literal date in the format of: '2024-03-31'
+
+#Querie for AC plug
+def setPlugData(mac):
+    global outdoorPlug
+    outdoorPlug = client.plugs.info(device_mac= mac)
+    
+
+#Passes string literal date in the format of: 'YYYY-MM-DD'
 def getUsageData(date):
     #Assignes electrical usage records to "PlugRecords" Var
+    print(outdoorPlug.mac)
     PlugRecords = client.plugs.get_usage_records(device_mac=outdoorPlug.mac, device_model=outdoorPlug.product.model, start_time=datetime.datetime.fromisoformat(date))
     return PlugRecords
 
@@ -34,6 +42,21 @@ def printDaily(date):
     for key, value in newDict.items():
         string = key.strftime('%m/%d/%Y')
         print(f"{string}:{value / 1000} KWh")
+    #Create string
+    rtrnString = ''
+    monthParser = list(newDict.keys())
+    month = monthParser[0].strftime('%m')
+    rtrnString = monthParser[0].strftime('%B %Y') + '\n'
+    for key, value in newDict.items():
+        if key.strftime('%m') != month:
+            rtrnString += (f"\n{key.strftime('%B %Y')}\n{key.strftime('%a the %d')}: {value / 1000} KWh\n")
+            month = key.strftime('%m')
+            print("from new line")
+        else:
+            rtrnString += (f"{key.strftime('%a the %d')}: {value / 1000} KWh\n")
+            month = key.strftime('%m')
+            print("from same line")
+    return rtrnString
 
 
 #TESTING
@@ -177,15 +200,19 @@ def printDailyPowerUsage():
     print("Comprehensive Total: ", runningTotal / 1000, "KWh")
 
 def getDeviceList():
+    deviceListString = ""
     DeviceList = client.devices_list()
     print("====================================\n")
     for device in client.devices_list():
+        deviceListString += (f"mac: {device.mac}\nnickname: {device.nickname}\nis_online: {device.is_online}\nproduct model: {device.product.model}\n")
+        deviceListString += "\n ----- \n"
         print(f"mac: {device.mac}")
         print(f"nickname: {device.nickname}")
         print(f"is_online: {device.is_online}")
         print(f"product model: {device.product.model}")
         print()
     print("\n====================================\n")
+    return deviceListString
 
 
 # Need to pass in device_mac

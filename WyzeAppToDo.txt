@@ -1,5 +1,7 @@
 Wyze interface app:
 
+*Think about improving run speed. Maybe cache data so the program doesn't have to queri the servers more than it needs to
+
 *Choose the start date from which data aggregation begins.
 
 *Choose format of aggregated data:
@@ -17,6 +19,5 @@ Wyze interface app:
 
 *(maybe) link to the Wyze API key generation site.
 
-*Enter account info (log in) and remember is desired.
 
 *I like the tabs widget
