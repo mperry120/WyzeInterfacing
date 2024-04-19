@@ -16,7 +16,7 @@ import numpy as np
 
 
 #Set date to pull data from
-pullDate = '2024-03-15'
+pullDate = '2023-01-01'
 
 
     # email = 'mperry120@gmail.com',
@@ -30,21 +30,27 @@ font = QFont("Times", 10)
 try:
 
 
+
     class usageWindow(QWidget):
         def __init__(self, mac):
             super().__init__()
+
             func.setPlugData(mac)
+            
             self.setWindowTitle("Wyze Data Portal - Power Usage")
-            self.setGeometry(350,150,600,400)
-            self.setContentsMargins(20,20,20,20)
+            self.setGeometry(350, 150, 600, 400)
+            self.setContentsMargins(20, 20, 20, 20)
+
 
             dataDict = func.getDaily(pullDate)
             dataString = func.dictString(dataDict)
 
             x, y1 = func.dictList(dataDict)
 
+            # Convert datetime.date objects to floating point numbers
+            x_timestamp = [datetime.datetime.fromordinal(date.toordinal()).timestamp() for date in x]
 
-            
+
             mainLayout = QVBoxLayout()
             self.tabs = QTabWidget()
             self.tab1 = QWidget()
@@ -59,29 +65,42 @@ try:
 
             usageText.setText(dataString)
 
-            #Need to write a function that converts a dict into two lists.
-
-
             readOutLayout = QVBoxLayout()
             readOutLayout.addWidget(usageText)
             self.tab1.setLayout(readOutLayout)
 
-            graph = pg.plot()
-            gphTitle = "Power Usage"
-            
+            graph = pg.PlotWidget()
+            graph.showGrid(x=True, y=True)
+            gphTitle = 'Power Usage'
+            graph.setLabel('bottom', (pullDate + ' - present'))
+            graph.setLabel('left', 'Power Usage (KWh)')
 
-            barGraph = pg.BarGraphItem(x = x, height = y1, width = 0.6, brush = 'g')
-            graph.addItem(barGraph)
+            # Plotting the data
+            plot = graph.plot(x_timestamp, y1, pen='g', name=gphTitle)
+
+            # Set x-axis ticks and labels to display dates
+            date_strings = [date.strftime('%m-%d') for date in x]
+            ticks = [(x_timestamp[i], date_strings[i]) for i in range(len(x))]
+
+            # Set max number of ticks to display
+            max_ticks = 10
+            if len(ticks) > max_ticks:
+                # If there are too many ticks, hide the tick text
+                for i, tick in enumerate(ticks):
+                    if i % 2 == 0:
+                        ticks[i] = (tick[0], '')
+                # graph.getAxis('bottom').setStyle(showValues=False)
+
+            graph.getAxis('bottom').setTicks([ticks])
+
+
             graphLayout = QVBoxLayout()
             graphLayout.addWidget(graph)
             self.tab2.setLayout(graphLayout)
 
-
-            # self.tab2.setLayout()
             mainLayout.addWidget(self.tabs)
-            
-
             self.setLayout(mainLayout)
+
 
             
 

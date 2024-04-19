@@ -57,11 +57,9 @@ def dictString(dict):
         if key.strftime('%m') != month:
             rtrnString += (f"\n{key.strftime('%B %Y')}\n{key.strftime('%a the %d')}: {value / 1000} KWh\n")
             month = key.strftime('%m')
-            print("from new line")
         else:
             rtrnString += (f"{key.strftime('%a the %d')}: {value / 1000} KWh\n")
             month = key.strftime('%m')
-            print("from same line")
     return rtrnString
 
 
@@ -71,10 +69,12 @@ def dictList(dict):
     list1 = []
     list2 = []
     for key, value in dict.items():
-        if key == datetime:
-            list1 += [key.strftime('%m/%d')]
-            list2 += [int(value / 1000)]
+        if isinstance(key, datetime.date):
+            list1 += [key]
+            list2 += [float(value / 1000)]
+            print('from datetime')
         else:
+            print('from string')
             list1 += [key]
             list2 += [value]
     return list1, list2
@@ -172,41 +172,13 @@ def printHourlyPowerUsage():
     print("Comprehensive Total: ", runningTotal / 1000, "KWh")
 
 
-def getDailyPowerUsage():
-    #Print formatted daily usage list
-    num = 0
-    dateBuff = "None"
-    dailyTotal = 0
-    runningTotal = 0
-    for x in keyList:
-        date = keyList[num].strftime('%m/%d/%Y %H:%M:%S')
-        if date[:10] != dateBuff[:10]:
-            print("Total: ", dailyTotal / 1000)
-            dailyTotal = 0
-            print('=================\n')
-            print(date[:10])
-            print()
-            print(date[11:16], "-- ", usageList[num] / 1000, "KWh")
-            dailyTotal += usageList[num]
-            runningTotal += usageList[num]
-            
-        else:
-            print(date[11:16], "-- ", usageList[num] / 1000, "KWh")
-            dailyTotal += usageList[num]
-            runningTotal += usageList[num]
-
-        num += 1
-        dateBuff = date
-    print("Total: ", dailyTotal / 1000, "KWh")
-    print('=================')
-    print("Comprehensive Total: ", runningTotal / 1000, "KWh")
 
 def getDeviceList():
     deviceListString = ""
     DeviceList = client.devices_list()
     print("====================================\n")
     for device in client.devices_list():
-        deviceListString += (f"mac: {device.mac}\nnickname: {device.nickname}\nis_online: {device.is_online}\nproduct model: {device.product.model}\n")
+        deviceListString += (f"nickname: {device.nickname}\nis_online: {device.is_online}\nmac: {device.mac}\nproduct model: {device.product.model}\n")
         deviceListString += "\n ----- \n"
         print(f"mac: {device.mac}")
         print(f"nickname: {device.nickname}")
