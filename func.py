@@ -29,7 +29,9 @@ def getUsageData(date):
     PlugRecords = client.plugs.get_usage_records(device_mac=outdoorPlug.mac, device_model=outdoorPlug.product.model, start_time=datetime.datetime.fromisoformat(date))
     return PlugRecords
 
-def printDaily(date):
+
+#splite into 2 funcs. getDaily() returns a dict. dictString() converts and returns string.
+def getDaily(date):
     plugRecs = getUsageData(date)
     newDict = defaultdict(int)
     #make list
@@ -42,12 +44,16 @@ def printDaily(date):
     for key, value in newDict.items():
         string = key.strftime('%m/%d/%Y')
         print(f"{string}:{value / 1000} KWh")
-    #Create string
+    return newDict
+
+
+#Create string
+def dictString(dict):
     rtrnString = ''
-    monthParser = list(newDict.keys())
+    monthParser = list(dict.keys())
     month = monthParser[0].strftime('%m')
     rtrnString = monthParser[0].strftime('%B %Y') + '\n'
-    for key, value in newDict.items():
+    for key, value in dict.items():
         if key.strftime('%m') != month:
             rtrnString += (f"\n{key.strftime('%B %Y')}\n{key.strftime('%a the %d')}: {value / 1000} KWh\n")
             month = key.strftime('%m')
@@ -61,21 +67,17 @@ def printDaily(date):
 
 #TESTING
 
-def printDailyString(date):
-    plugRecs = getUsageData(date)
-    newDict = defaultdict(int)
-    rtrnString = ''
-    #make list
-    for wyzeRec in plugRecs:
-        #aggragate data
-        for date, value in wyzeRec.hourly_data.items():
-            day = date.date()
-            newDict[day] += value
-    #print data
-    for key, value in newDict.items():
-        string = key.strftime('%m/%d/%Y')
-        rtrnString += (f"{string}: {value / 1000} KWh\n")
-    return rtrnString
+def dictList(dict):
+    list1 = []
+    list2 = []
+    for key, value in dict.items():
+        if key == datetime:
+            list1 += [key.strftime('%m/%d')]
+            list2 += [int(value / 1000)]
+        else:
+            list1 += [key]
+            list2 += [value]
+    return list1, list2
 
 
 #TESTING
@@ -170,7 +172,7 @@ def printHourlyPowerUsage():
     print("Comprehensive Total: ", runningTotal / 1000, "KWh")
 
 
-def printDailyPowerUsage():
+def getDailyPowerUsage():
     #Print formatted daily usage list
     num = 0
     dateBuff = "None"

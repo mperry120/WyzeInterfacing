@@ -27,7 +27,7 @@ class Window(QWidget):
 
     def fetchData(self, dateInsert):
         date = self.dateInsert.text()
-        WyzeData = func.printDailyString(date)
+        WyzeData = func.getDailyString(date)
         self.text.setText(WyzeData)
         self.text.adjustSize()
 

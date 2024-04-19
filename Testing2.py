@@ -1,4 +1,5 @@
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel
+import pyqtgraph as pg
 
 class MyWindow(QWidget):
     def __init__(self):

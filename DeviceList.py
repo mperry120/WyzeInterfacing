@@ -10,6 +10,9 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from wyze_sdk.errors import WyzeApiError
 from datetime import timedelta
+import pyqtgraph as pg
+from pyqtgraph.Qt import QtCore, QtGui
+import numpy as np
 
 
 #Set date to pull data from
@@ -34,14 +37,48 @@ try:
             self.setWindowTitle("Wyze Data Portal - Power Usage")
             self.setGeometry(350,150,600,400)
             self.setContentsMargins(20,20,20,20)
+
+            dataDict = func.getDaily(pullDate)
+            dataString = func.dictString(dataDict)
+
+            x, y1 = func.dictList(dataDict)
+
+
             
             mainLayout = QVBoxLayout()
+            self.tabs = QTabWidget()
+            self.tab1 = QWidget()
+            self.tab2 = QWidget()
+            self.tabs.addTab(self.tab1, "ReadOut")
+            self.tabs.addTab(self.tab2, "Graph")
+
             usageText = QTextEdit(self)
             usageText.setReadOnly(True)
             usageText.setFont(font)
             usageText.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            usageText.setText(func.printDaily(pullDate))
-            mainLayout.addWidget(usageText)
+
+            usageText.setText(dataString)
+
+            #Need to write a function that converts a dict into two lists.
+
+
+            readOutLayout = QVBoxLayout()
+            readOutLayout.addWidget(usageText)
+            self.tab1.setLayout(readOutLayout)
+
+            graph = pg.plot()
+            gphTitle = "Power Usage"
+            
+
+            barGraph = pg.BarGraphItem(x = x, height = y1, width = 0.6, brush = 'g')
+            graph.addItem(barGraph)
+            graphLayout = QVBoxLayout()
+            graphLayout.addWidget(graph)
+            self.tab2.setLayout(graphLayout)
+
+
+            # self.tab2.setLayout()
+            mainLayout.addWidget(self.tabs)
             
 
             self.setLayout(mainLayout)
