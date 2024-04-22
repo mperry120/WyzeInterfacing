@@ -72,9 +72,7 @@ def dictList(dict):
         if isinstance(key, datetime.date):
             list1 += [key]
             list2 += [float(value / 1000)]
-            print('from datetime')
         else:
-            print('from string')
             list1 += [key]
             list2 += [value]
     return list1, list2

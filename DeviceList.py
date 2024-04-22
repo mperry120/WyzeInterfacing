@@ -16,7 +16,7 @@ import numpy as np
 
 
 #Set date to pull data from
-pullDate = '2023-01-01'
+pullDate = '2024-04-20'
 
 
     # email = 'mperry120@gmail.com',
@@ -30,7 +30,10 @@ font = QFont("Times", 10)
 try:
 
 
-
+    #ADD FUNCTIONALITY FOR MULTIPLE GRAPH/READOUT WINDOWS
+    #ADD FUNCTIONALITY FOR DAILY/WEEKLY/MONTHLY DATA
+    #REFACTOR DEVICE DATA LIST PAGE FOR BETTER CLARITY ON WHICH DEVICES CAN PROVIDE ENERGY USAGE DATA
+    #ADD FUNCTIONALITY FOR SELECTABLE START DATE FOR DATA PULL... THINK ABOUT WHETHER OR NOT TO ALLOW FOR END DATE
     class usageWindow(QWidget):
         def __init__(self, mac):
             super().__init__()
@@ -69,18 +72,28 @@ try:
             readOutLayout.addWidget(usageText)
             self.tab1.setLayout(readOutLayout)
 
+            xTest = [1.1, 2.9, 3.1, 4.6, 5.2, 6.1, 7.4, 8.6, 9.4, 10.8]
+            yTest = [5.4, 5.3, 7.4, 10.1, 3.0, 8.8, 9.4, 1.2, 6.7, 2.1]
+            print(xTest, '\n', yTest, '\n', x_timestamp, '\n', y1)
+            xTest2 = []
+            for i in x_timestamp:
+                xTest2.append(i/1000)
+            print(xTest2)
+
             graph = pg.PlotWidget()
             graph.showGrid(x=True, y=True)
             gphTitle = 'Power Usage'
             graph.setLabel('bottom', (pullDate + ' - present'))
             graph.setLabel('left', 'Power Usage (KWh)')
 
-            # Plotting the data
-            plot = graph.plot(x_timestamp, y1, pen='g', name=gphTitle)
+            # # Plotting the data
+            # plot = graph.plot(x_timestamp, y1, pen='g', name=gphTitle)
 
             # Set x-axis ticks and labels to display dates
             date_strings = [date.strftime('%m-%d') for date in x]
             ticks = [(x_timestamp[i], date_strings[i]) for i in range(len(x))]
+
+            
 
             # Set max number of ticks to display
             max_ticks = 10
@@ -92,6 +105,12 @@ try:
                 # graph.getAxis('bottom').setStyle(showValues=False)
 
             graph.getAxis('bottom').setTicks([ticks])
+
+            axis = pg.DateAxisItem()
+            graph.setAxisItems({'bottom': axis})
+
+            barGraph = pg.BarGraphItem(x=x_timestamp, height=y1, width=50000, brush='c')
+            graph.addItem(barGraph)
 
 
             graphLayout = QVBoxLayout()
