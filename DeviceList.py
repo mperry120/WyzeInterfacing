@@ -1,9 +1,6 @@
 import os
 import sys
 import datetime
-import time
-import calendar
-import pprint
 import func
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import Qt
@@ -32,11 +29,13 @@ font = QFont("Times", 10)
 
 try:
 
-
+    #CREATE A SEARCH AND REPLACE FUNCTION FOR .TXT FILES... THAT PROBABLY EXISTS ALREADY IN SOME MODULE SOMEWHERE..
+    #NONE OF MY FILE READ/WRITE FUNCS NEED TO BE PASSED AN ARGUMENT. THEY ALL ACCESS THE SAME FILE. NEEDS TO BE FIXED
     #ADD FUNCTIONALITY FOR MULTIPLE GRAPH/READOUT WINDOWS
     #ADD FUNCTIONALITY FOR DAILY/WEEKLY/MONTHLY DATA
     #REFACTOR DEVICE DATA LIST PAGE FOR BETTER CLARITY ON WHICH DEVICES CAN PROVIDE ENERGY USAGE DATA
-    #ADD FUNCTIONALITY FOR SELECTABLE START DATE FOR DATA PULL... THINK ABOUT WHETHER OR NOT TO ALLOW FOR END DATE
+    #ADD FUNCTIONALITY FOR SELECTABLE START & END DATE FOR DATA PULL.
+    #ADD AUTOMATIC AUTOFILL FOR THE LAST DEVICE MAC ADDRESS USED
     class usageWindow(QWidget):
         def __init__(self, mac):
             super().__init__()
@@ -81,18 +80,25 @@ try:
 
 
             #Center Layout
-            instructions = QLabel("Select the start and end dates for the data pull")
+            #Layout structure
+            centerVLayout = QVBoxLayout()
+            centerVHLayout1 = QHBoxLayout()
+            centerVHLayout2 = QHBoxLayout()
+            centerVLayout.addLayout(centerVHLayout1)
+            centerVLayout.addLayout(centerVHLayout2)
+            centerLayout.addLayout(centerVLayout)
+
+            instructions = QLabel("Select dates for the data pull")
             instructions.setFont(font)
-            centerLayout.addWidget(instructions)
-            centerLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
+            centerVHLayout1.addWidget(instructions)
+            centerVHLayout1.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.tab1.setLayout(settingsLayout)
 
-            #Create button and align to the bottom of the tab
+            #Create button and align to the center of the tab
             enterButton = QPushButton("Enter")
             enterButton.setFont(font)
-            centerLayout.addWidget(enterButton)
-            centerLayout.addStretch()
-            centerLayout.setAlignment(Qt.AlignmentFlag.AlignBottom)
+            centerVHLayout2.addWidget(enterButton)
+            centerVHLayout2.setAlignment(Qt.AlignmentFlag.AlignCenter)
             enterButton.setMaximumWidth(100)
 
 
@@ -222,6 +228,9 @@ try:
             rightLayout.addWidget(self.errorLabel)
             self.macAddress = QLineEdit(self)
             self.macAddress.setPlaceholderText("Mac Address")
+            if func.is_remembered("SaveData.txt"):
+                self.macAddress.setText(func.get_last_mac("SaveData.txt"))
+            
 
             
 
@@ -238,6 +247,10 @@ try:
             self.setLayout(mainLayout)
         
         def getUsageData(self):
+            #append lineToWrite to SaveData.txt
+            if func.is_remembered("SaveData.txt"):
+                func.replaceLine("SaveData.txt", "last_mac:", self.macAddress.text())
+
             if self.macAddress.text() != "":
                 self.usageWindow = usageWindow(self.macAddress.text())
                 self.usageWindow.show()
@@ -323,18 +336,20 @@ try:
 
         def pressEnter(self):
             if self.rememberMe.isChecked():
-                f = open("SaveData.txt", "w")
-                lineToWrite = "email: " + self.email.text() + "\n"
-                f.write(lineToWrite)
-                lineToWrite = "password: " + self.password.text() + "\n"
-                f.write(lineToWrite)
-                lineToWrite = "key_id: " + self.key_id.text() + "\n"
-                f.write(lineToWrite)
-                lineToWrite = "api_key: " + self.api_key.text() + "\n"
-                f.write(lineToWrite)
-                lineToWrite = "rememberMe: true\n"
-                f.write(lineToWrite)
-                f.close()
+                if func.is_remembered("SaveData.txt"):
+                    func.replaceLine("SaveData.txt", "email:", self.email.text())
+                    func.replaceLine("SaveData.txt", "password:", self.password.text())
+                    func.replaceLine("SaveData.txt", "key_id:", self.key_id.text())
+                    func.replaceLine("SaveData.txt", "api_key:", self.api_key.text())
+                    func.replaceLine("SaveData.txt", "rememberMe:", "true")
+                else:
+                    f = open("SaveData.txt", "w")
+                    f.write("email: " + self.email.text() + "\n")
+                    f.write("password: " + self.password.text() + "\n")
+                    f.write("key_id: " + self.key_id.text() + "\n")
+                    f.write("api_key: " + self.api_key.text() + "\n")
+                    f.write("rememberMe: true")
+                    f.close()
             else:
                 f = open("SaveData.txt", "w")
                 f.write("")

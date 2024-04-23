@@ -248,3 +248,38 @@ def get_api_key(filename):
                 api_key = line.split(':', 1)[1].strip()
                 return api_key
     return None
+
+def get_last_mac(filename):
+    with open(filename, 'r') as file:
+        for line in file:
+            if line.startswith('last_mac:'):
+                Last_mac = line.split(':', 1)[1].strip()
+                return Last_mac
+#FIX THIS: NEED IT TO ADD DATATYPE(EMAIL, PASS, ETC) IF NOT PRESENT
+def replaceLine(filename, oldLine, newLine):
+    with open(filename, 'r') as file:
+        data = file.read()
+        if oldLine in data:
+            for line in data.splitlines():
+                if line.startswith(oldLine):
+                    var1 = line.split(':', 1)[0].strip()
+                    var2 = line.split(':', 1)[1].strip()
+                    data = data.replace(var1 + ': ' + var2, var1 + ': ' + newLine)
+            with open(filename, 'w') as file:
+                file.write(data)
+        else:
+            data += newLine
+            with open(filename, 'w') as file:
+                data += '\n' + oldLine + newLine
+                file.write(data)
+            
+
+def is_remembered(filename):
+    with open(filename, 'r') as file:
+        for line in file:
+            if line.startswith('rememberMe:'):
+                rememberMe = line.split(':', 1)[1].strip()
+                if rememberMe == 'true':
+                    return True
+                else:
+                    return False
