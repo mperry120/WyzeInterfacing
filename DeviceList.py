@@ -13,10 +13,13 @@ from datetime import timedelta
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui
 import numpy as np
+from PyQt6.QtCore import QDate
+from PyQt6.QtWidgets import QDateEdit
+
 
 
 #Set date to pull data from
-pullDate = '2024-04-20'
+pullDate = '2024-03-20'
 
 
     # email = 'mperry120@gmail.com',
@@ -58,20 +61,83 @@ try:
             self.tabs = QTabWidget()
             self.tab1 = QWidget()
             self.tab2 = QWidget()
-            self.tabs.addTab(self.tab1, "ReadOut")
-            self.tabs.addTab(self.tab2, "Graph")
+            self.tab3 = QWidget()
+            self.tabs.addTab(self.tab1, "Settings")
+            self.tabs.addTab(self.tab2, "ReadOut")
+            self.tabs.addTab(self.tab3, "Graph")
 
+
+            #Settings Tab
+
+            settingsLayout = QHBoxLayout()
+            leftLayout = QVBoxLayout()
+            centerLayout = QVBoxLayout()
+            rightLayout = QVBoxLayout()
+            settingsLayout.addLayout(leftLayout)
+            settingsLayout.addLayout(centerLayout)
+            settingsLayout.addLayout(rightLayout)
+            leftLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            rightLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+
+            #Center Layout
+            instructions = QLabel("Select the start and end dates for the data pull")
+            instructions.setFont(font)
+            centerLayout.addWidget(instructions)
+            centerLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
+            self.tab1.setLayout(settingsLayout)
+
+            #Create button and align to the bottom of the tab
+            enterButton = QPushButton("Enter")
+            enterButton.setFont(font)
+            centerLayout.addWidget(enterButton)
+            centerLayout.addStretch()
+            centerLayout.setAlignment(Qt.AlignmentFlag.AlignBottom)
+            enterButton.setMaximumWidth(100)
+
+
+            #Left Layout
+            startDateLabel = QLabel("Start Date")
+            startDateLabel.setFont(font)
+            leftLayout.addWidget(startDateLabel)
+
+            self.startDate = QDateEdit(self)
+            self.startDate.setCalendarPopup(True)
+            self.startDate.setDisplayFormat('MM-dd-yyyy')
+            self.startDate.setDate(QDate.currentDate().addDays(-7))
+            self.startDate.setFixedWidth(200)
+            self.startDate.setMaximumDate(QDate.currentDate())
+            leftLayout.addWidget(self.startDate)
+
+            #Right Layout
+            startDateLabel = QLabel("End Date")
+            startDateLabel.setFont(font)
+            rightLayout.addWidget(startDateLabel)
+
+            self.endDate = QDateEdit(self)
+            self.endDate.setCalendarPopup(True)
+            self.endDate.setDisplayFormat('MM-dd-yyyy')
+            self.endDate.setDate(QDate.currentDate())
+            self.endDate.setFixedWidth(200)
+            self.endDate.setMaximumDate(QDate.currentDate())
+            rightLayout.addWidget(self.endDate)
+
+
+
+
+            #ReadOut Tab
             usageText = QTextEdit(self)
             usageText.setReadOnly(True)
             usageText.setFont(font)
             usageText.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
             usageText.setText(dataString)
 
             readOutLayout = QVBoxLayout()
             readOutLayout.addWidget(usageText)
-            self.tab1.setLayout(readOutLayout)
+            self.tab2.setLayout(readOutLayout)
 
+
+            #Temporary lists for testing graph
             xTest = [1.1, 2.9, 3.1, 4.6, 5.2, 6.1, 7.4, 8.6, 9.4, 10.8]
             yTest = [5.4, 5.3, 7.4, 10.1, 3.0, 8.8, 9.4, 1.2, 6.7, 2.1]
             print(xTest, '\n', yTest, '\n', x_timestamp, '\n', y1)
@@ -80,31 +146,34 @@ try:
                 xTest2.append(i/1000)
             print(xTest2)
 
+            #Graph Tab
             graph = pg.PlotWidget()
             graph.showGrid(x=True, y=True)
             gphTitle = 'Power Usage'
             graph.setLabel('bottom', (pullDate + ' - present'))
             graph.setLabel('left', 'Power Usage (KWh)')
 
-            # # Plotting the data
-            # plot = graph.plot(x_timestamp, y1, pen='g', name=gphTitle)
+            def placeholderForPhasedOutCode():
+                # # Plotting the data
+                # plot = graph.plot(x_timestamp, y1, pen='g', name=gphTitle)
 
-            # Set x-axis ticks and labels to display dates
-            date_strings = [date.strftime('%m-%d') for date in x]
-            ticks = [(x_timestamp[i], date_strings[i]) for i in range(len(x))]
+                # Set x-axis ticks and labels to display dates
+                # date_strings = [date.strftime('%m-%d') for date in x]
+                # ticks = [(x_timestamp[i], date_strings[i]) for i in range(len(x))]
 
-            
+                
 
-            # Set max number of ticks to display
-            max_ticks = 10
-            if len(ticks) > max_ticks:
-                # If there are too many ticks, hide the tick text
-                for i, tick in enumerate(ticks):
-                    if i % 2 == 0:
-                        ticks[i] = (tick[0], '')
-                # graph.getAxis('bottom').setStyle(showValues=False)
+                # # Set max number of ticks to display
+                # max_ticks = 10
+                # if len(ticks) > max_ticks:
+                #     # If there are too many ticks, hide the tick text
+                #     for i, tick in enumerate(ticks):
+                #         if i % 2 == 0:
+                #             ticks[i] = (tick[0], '')
+                #     graph.getAxis('bottom').setStyle(showValues=False)
 
-            graph.getAxis('bottom').setTicks([ticks])
+                # graph.getAxis('bottom').setTicks([ticks])
+                pass
 
             axis = pg.DateAxisItem()
             graph.setAxisItems({'bottom': axis})
@@ -115,7 +184,7 @@ try:
 
             graphLayout = QVBoxLayout()
             graphLayout.addWidget(graph)
-            self.tab2.setLayout(graphLayout)
+            self.tab3.setLayout(graphLayout)
 
             mainLayout.addWidget(self.tabs)
             self.setLayout(mainLayout)
@@ -123,7 +192,7 @@ try:
 
             
 
-    class newWindow(QWidget):
+    class deviceListWindow(QWidget):
         def __init__(self):
             super().__init__()
             self.setWindowTitle("Wyze Data Portal - Device List")
@@ -145,12 +214,6 @@ try:
             leftLayout.addWidget(self.deviceList)
             self.deviceList.setText(func.getDeviceList())
 
-            daily = QRadioButton("Daily")
-            weekly = QRadioButton("Weekly")
-            monthly = QRadioButton("Monthly")
-            rightLayout.addWidget(daily)
-            rightLayout.addWidget(weekly)
-            rightLayout.addWidget(monthly)
 
             
             self.errorLabel = QLabel("")
@@ -276,7 +339,7 @@ try:
                 f = open("SaveData.txt", "w")
                 f.write("")
                 f.close()
-            self.deviceListWindow = newWindow()
+            self.deviceListWindow = deviceListWindow()
             self.deviceListWindow.show()
             #Seems to work, but I'm not sure if it's the best way to do it
             self.window().close()
