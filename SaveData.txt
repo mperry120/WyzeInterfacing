@@ -1,6 +1,6 @@
-email: matt
-password: perry
+email: Matt
+password: Perry
 key_id: none
-api_key: nada
-rememberMe: true7C78B2647DD3
-last_mac:7C78B2647DD3
+api_key: nanda
+rememberMe: true
+last_mac: 7C78B2647DD3
