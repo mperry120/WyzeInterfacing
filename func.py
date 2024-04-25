@@ -209,3 +209,8 @@ def is_remembered(filename):
                     return True
                 else:
                     return False
+                
+def float_range(start, stop, step):
+    while start < stop:
+        yield start
+        start += step

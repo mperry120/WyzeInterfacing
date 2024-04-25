@@ -16,7 +16,7 @@ from PyQt6.QtWidgets import QDateEdit
 
 
 #Set date to pull data from
-pullDate = '2024-04-22'
+pullDate = '2024-04-01'
 
 
     # email = 'mperry120@gmail.com',
@@ -74,6 +74,7 @@ try:
 
                 mainLayout = QVBoxLayout()
                 self.tabs = QTabWidget()
+                self.tabs.setTabsClosable(True)
                 self.tab1 = QWidget()
                 self.tab2 = QWidget()
                 self.tab3 = QWidget()
@@ -158,6 +159,8 @@ try:
                 readOutLayout.addWidget(usageText)
                 self.tab2.setLayout(readOutLayout)
 
+
+
                 #Graph Tab
                 graph = pg.PlotWidget()
                 graph.showGrid(x=True, y=True)
@@ -178,6 +181,7 @@ try:
 
                 mainLayout.addWidget(self.tabs)
                 self.setLayout(mainLayout)
+
             self.close()
 
         def testFunc(self):
@@ -205,28 +209,46 @@ try:
 
             x, y1 = func.dictList(dataDict)
 
-            # Convert datetime.date objects to floating point numbers
-            x_timestamp = [datetime.datetime.fromordinal(date.toordinal()).timestamp() for date in x]
+            # Convert datetime.datetime objects to timestamps
+            x_timestamp = [dateHour.timestamp() for dateHour in x]
 
             graph = pg.PlotWidget()
             graph.showGrid(x=True, y=True)
             graph.setLabel('bottom', (pullDate + ' - present'))
             graph.setLabel('left', 'Power Usage (KWh)')
 
+            maxYselector = QComboBox()
+            maxYselector.addItem('1', '2', '3', '4', '5', '6', '7', '8', '9', '10')
+            #WTF GET THIS SHIT TO WORK, DAMNIT!! IM NOT GONNA ENTER A MILLION FLOATS MANUALLY
+            #maxYselector.addItem(func.float_range(0.1, 5, 0.1))
+
+
             axis = pg.DateAxisItem()
             graph.setAxisItems({'bottom': axis})
-
-            barGraph = pg.BarGraphItem(x=x_timestamp, height=y1, width=250, brush='c')
+            maxY = 5
+            graph.setYRange(0, maxY)
+            barGraph = pg.BarGraphItem(x=x_timestamp, height=y1, width=850, brush='c')
             graph.addItem(barGraph)
+
+            maxYselector.currentIndexChanged.connect(lambda: graph.setYRange(0, int(maxYselector.currentText())))
 
             print(x_timestamp)
             print(y1)
             print('+++++++++++++++++++++++')
             print(dataDict)
 
+            
+
+
+
+            mainGraphLayout = QHBoxLayout()
             graphLayout = QVBoxLayout()
+            setterLayout = QVBoxLayout()
             graphLayout.addWidget(graph)
-            self.tab5.setLayout(graphLayout)
+            setterLayout.addWidget(maxYselector)
+            mainGraphLayout.addLayout(graphLayout)
+            mainGraphLayout.addLayout(setterLayout)
+            self.tab5.setLayout(mainGraphLayout)
 
 
     class deviceListWindow(QWidget):
