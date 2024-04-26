@@ -1,6 +1,6 @@
 email: Matt
 password: Perry
 key_id: none
-api_key: nanda
+api_key: nada
 rememberMe: true
 last_mac: 7C78B2647DD3

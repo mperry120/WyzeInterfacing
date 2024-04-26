@@ -24,7 +24,7 @@ pullDate = '2024-04-01'
     # key_id ='0cf980f9-364e-44a5-9471-8ac8ec5fb6ff',
     # api_key = 'XLMyd6F1Zs92SedNfGCrEs4a2l2oHnNwnMQx1YPxN9h2TZXR23gwz8avWYN7')
 
-font = QFont("Ariel", 10)
+font = QFont("Courier", 10)
 errorFont = QFont("Times", 12, QFont.Weight.Bold)
 
 try:
@@ -65,6 +65,9 @@ try:
 
                 dataDict = func.getDaily(pullDate)
                 dataString = func.dictString(dataDict)
+                #TESTING
+                print(dataString)
+                #TESTING
 
                 x, y1 = func.dictList(dataDict)
 
@@ -188,7 +191,7 @@ try:
             # ARGUMENTS NEEDED: (PULL STARTDATE, PULL ENDDATE, (DATA FORMATED DAILY, WEEKLY, OR MONTHLY))
             # Collate hourly data
             dataDict = func.getHourly(pullDate)
-            dataString = func.dictString(dataDict)
+            dataString = func.dictStringHourly(dataDict)
 
             # Create hourly readout tab
             self.tab4 = QWidget()
@@ -217,35 +220,40 @@ try:
             graph.setLabel('bottom', (pullDate + ' - present'))
             graph.setLabel('left', 'Power Usage (KWh)')
 
+            # Create a dropdown menu to select the max Y value for the graph
             maxYselector = QComboBox()
-            maxYselector.addItem('1', '2', '3', '4', '5', '6', '7', '8', '9', '10')
-            #WTF GET THIS SHIT TO WORK, DAMNIT!! IM NOT GONNA ENTER A MILLION FLOATS MANUALLY
-            #maxYselector.addItem(func.float_range(0.1, 5, 0.1))
+            maxYselector.addItems(['0.5', '1', '2', '3', '4', '5'])
 
+            # Get the max value for the Y axis
+            maxVal = 0
+            for val in dataDict.values():
+                if val / 1000 > maxVal:
+                    maxVal = val / 1000
+            print(maxVal)
 
+            # Create an auto-resize button for y-axis
+            autoResizeButton = QPushButton("Resize")
+            autoResizeButton.setFont(font)
+            autoResizeButton.clicked.connect(lambda: graph.setYRange(0, maxVal))
+
+            # Set parameters for graph x-axis
             axis = pg.DateAxisItem()
             graph.setAxisItems({'bottom': axis})
-            maxY = 5
-            graph.setYRange(0, maxY)
             barGraph = pg.BarGraphItem(x=x_timestamp, height=y1, width=850, brush='c')
             graph.addItem(barGraph)
 
-            maxYselector.currentIndexChanged.connect(lambda: graph.setYRange(0, int(maxYselector.currentText())))
-
-            print(x_timestamp)
-            print(y1)
-            print('+++++++++++++++++++++++')
-            print(dataDict)
+            maxYselector.currentIndexChanged.connect(lambda: graph.setYRange(0, float(maxYselector.currentText())))
 
             
-
 
 
             mainGraphLayout = QHBoxLayout()
             graphLayout = QVBoxLayout()
             setterLayout = QVBoxLayout()
             graphLayout.addWidget(graph)
+            setterLayout.addWidget(autoResizeButton)
             setterLayout.addWidget(maxYselector)
+            setterLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
             mainGraphLayout.addLayout(graphLayout)
             mainGraphLayout.addLayout(setterLayout)
             self.tab5.setLayout(mainGraphLayout)

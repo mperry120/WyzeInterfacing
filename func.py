@@ -74,13 +74,29 @@ def dictString(dict):
     rtrnString = monthParser[0].strftime('%B %Y') + '\n'
     for key, value in dict.items():
         if key.strftime('%m') != month:
-            rtrnString += (f"\n{key.strftime('%B %Y')}\n{key.strftime('%a the %d')}: {value / 1000} KWh\n")
+            rtrnString += (f"\n{key.strftime('%B %Y')}\n{key.strftime('%d %a'):8}- {value / 1000:>8} KWh\n")
             month = key.strftime('%m')
         else:
-            rtrnString += (f"{key.strftime('%a the %d')}: {value / 1000} KWh\n")
+            rtrnString += (f"{key.strftime('%d %a'):8}- {value / 1000:>8} KWh\n")
             month = key.strftime('%m')
-    return rtrnString
+    return rtrnString.replace(' -', '--').replace('-     ', '------').replace('-    ', '-----').replace('-   ', '----')
 
+
+#Create string for daily printout
+def dictStringHourly(dict):
+    rtrnString = ''
+    monthParser = list(dict.keys())
+    month = monthParser[0].strftime('%m')
+    rtrnString = monthParser[0].strftime('%B %Y') + '\n'
+    for key, value in dict.items():
+        if key.strftime('%m') != month:
+            rtrnString += (f"\n{key.strftime('%B %Y')}\n{key.strftime('%d %a %I%p'):10}- {value / 1000:>8} KWh\n")
+            month = key.strftime('%m')
+        else:
+            rtrnString += (f"{key.strftime('%d %a %I%p'):10}- {value / 1000:>8} KWh\n")
+            month = key.strftime('%m')
+    
+    return rtrnString.replace(' -', '--').replace('-     ', '------').replace('-    ', '-----').replace('-   ', '----')
 
 #Create list from dict
 def dictList(dict):
