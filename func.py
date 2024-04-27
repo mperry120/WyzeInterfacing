@@ -93,10 +93,10 @@ def dictStringHourly(dict):
             rtrnString += (f"\n{key.strftime('%B %Y')}\n{key.strftime('%d %a %I%p'):10}- {value / 1000:>8} KWh\n")
             month = key.strftime('%m')
         else:
-            rtrnString += (f"{key.strftime('%d %a %I%p'):10}- {value / 1000:>8} KWh\n")
+            rtrnString += (f"{key.strftime('%d %a %I%p'):12}- {value / 1000:>8} KWh\n")
             month = key.strftime('%m')
     
-    return rtrnString.replace(' -', '--').replace('-     ', '------').replace('-    ', '-----').replace('-   ', '----')
+    return rtrnString.replace('-     ', '------').replace('-    ', '-----').replace('-   ', '----')
 
 #Create list from dict
 def dictList(dict):

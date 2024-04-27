@@ -28,7 +28,7 @@ font = QFont("Courier", 10)
 errorFont = QFont("Times", 12, QFont.Weight.Bold)
 
 try:
-    # MAKE TABS REMOVABLE SOMEHOW
+    #MAKE TABS REMOVABLE
     #CHANGE USAGEWINDOW TO POP UP JUST A FEW PIXELS AWAY FROM THE DEVICE LIST WINDOW
     #CREATE A SEARCH AND REPLACE FUNCTION FOR .TXT FILES... THAT PROBABLY EXISTS ALREADY IN SOME MODULE SOMEWHERE..
     #NONE OF MY FILE READ/WRITE FUNCS NEED TO BE PASSED AN ARGUMENT. THEY ALL ACCESS THE SAME FILE. NEEDS TO BE FIXED
@@ -78,12 +78,14 @@ try:
                 mainLayout = QVBoxLayout()
                 self.tabs = QTabWidget()
                 self.tabs.setTabsClosable(True)
+                self.tabs.tabCloseRequested.connect(self.removeTab)
                 self.tab1 = QWidget()
-                self.tab2 = QWidget()
-                self.tab3 = QWidget()
+                # self.tab2 = QWidget()
+                # self.tab3 = QWidget()
                 self.tabs.addTab(self.tab1, "Settings")
-                self.tabs.addTab(self.tab2, "ReadOut")
-                self.tabs.addTab(self.tab3, "Graph")
+                # self.tabs.addTab(self.tab2, "ReadOut")
+                # self.tabs.addTab(self.tab3, "Graph")
+
 
 
                 #Settings Tab
@@ -99,12 +101,24 @@ try:
 
 
                 #Center Layout
-                #Layout structure
+                #Layout structure:
+                #Main Vertical Layout in center
                 centerVLayout = QVBoxLayout()
+
+                #3 Horizontal Layouts within the main vertical layout
                 centerVHLayout1 = QHBoxLayout()
                 centerVHLayout2 = QHBoxLayout()
+                centerVHLayout3 = QHBoxLayout()
+
+                #one more vertical Layout within centerVHLayout2 that contains the radio buttons
+                centerVvLayout1 = QVBoxLayout()
+
+                #Make it so
+                centerVHLayout2.addLayout(centerVvLayout1)
+                centerVHLayout2.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 centerVLayout.addLayout(centerVHLayout1)
                 centerVLayout.addLayout(centerVHLayout2)
+                centerVLayout.addLayout(centerVHLayout3)
                 centerLayout.addLayout(centerVLayout)
 
                 instructions = QLabel("Select dates for the data pull")
@@ -113,13 +127,44 @@ try:
                 centerVHLayout1.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 self.tab1.setLayout(settingsLayout)
 
-                #Create button and align to the center of the tab
-                enterButton = QPushButton("Enter")
-                enterButton.setFont(font)
-                centerVHLayout2.addWidget(enterButton)
-                centerVHLayout2.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                enterButton.setMaximumWidth(100)
-                enterButton.clicked.connect(self.testFunc)
+                #Create radio buttons for daily, weekly, and monthly data
+                self.hourlyButton = QRadioButton("Hourly Data")
+                self.hourlyButton.setFont(font)
+                self.dailyButton = QRadioButton("Daily Data")
+                self.dailyButton.setFont(font)
+                self.weeklyButton = QRadioButton("Weekly Data")
+                self.weeklyButton.setFont(font)
+                self.monthlyButton = QRadioButton("Monthly Data")
+                self.monthlyButton.setFont(font)
+
+                #Create a button group for the radio buttons
+                #Why do I want a button group?
+                #I want a button group so that only one radio button can be selected at a time... lol AI
+                buttonGroup = QButtonGroup()
+                buttonGroup.addButton(self.hourlyButton)
+                buttonGroup.addButton(self.dailyButton)
+                buttonGroup.addButton(self.weeklyButton)
+                buttonGroup.addButton(self.monthlyButton)
+
+                #Add buttons to the layout
+                centerVvLayout1.addWidget(self.hourlyButton)
+                centerVvLayout1.addWidget(self.dailyButton)
+                centerVvLayout1.addWidget(self.weeklyButton)
+                centerVvLayout1.addWidget(self.monthlyButton)
+
+
+
+                #Create Enter button and align to the center of the tab
+                enterButton1 = QPushButton("Enter")
+                enterButton1.setFont(font)
+                centerVHLayout3.addWidget(enterButton1)
+                centerVHLayout3.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                enterButton1.setMaximumWidth(100)
+
+                #PHASE OUT
+                #enterButton.clicked.connect(self.testFunc)
+                #PHASE OUT
+
 
 
                 #Left Layout
@@ -147,45 +192,104 @@ try:
                 self.endDate.setFixedWidth(200)
                 self.endDate.setMaximumDate(QDate.currentDate())
                 rightLayout.addWidget(self.endDate)
+                selectedDate = self.startDate.date().toString('yyyy-MM-dd')
 
 
 
 
                 #ReadOut Tab
-                usageText = QTextEdit(self)
-                usageText.setReadOnly(True)
-                usageText.setFont(font)
-                usageText.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                usageText.setText(dataString)
+                # usageText = QTextEdit(self)
+                # usageText.setReadOnly(True)
+                # usageText.setFont(font)
+                # usageText.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                # usageText.setText(dataString)
 
-                readOutLayout = QVBoxLayout()
-                readOutLayout.addWidget(usageText)
-                self.tab2.setLayout(readOutLayout)
+                # readOutLayout = QVBoxLayout()
+                # readOutLayout.addWidget(usageText)
+                # self.tab2.setLayout(readOutLayout)
 
 
 
                 #Graph Tab
-                graph = pg.PlotWidget()
-                graph.showGrid(x=True, y=True)
-                gphTitle = 'Power Usage'
-                graph.setLabel('bottom', (pullDate + ' - present'))
-                graph.setLabel('left', 'Power Usage (KWh)')
+                # graph = pg.PlotWidget()
+                # graph.showGrid(x=True, y=True)
+                # gphTitle = 'Power Usage'
+                # graph.setLabel('bottom', (pullDate + ' - present'))
+                # graph.setLabel('left', 'Power Usage (KWh)')
 
-                axis = pg.DateAxisItem()
-                graph.setAxisItems({'bottom': axis})
+                # axis = pg.DateAxisItem()
+                # graph.setAxisItems({'bottom': axis})
 
-                barGraph = pg.BarGraphItem(x=x_timestamp, height=y1, width=50000, brush='c')
-                graph.addItem(barGraph)
+                # barGraph = pg.BarGraphItem(x=x_timestamp, height=y1, width=50000, brush='c')
+                # graph.addItem(barGraph)
 
 
-                graphLayout = QVBoxLayout()
-                graphLayout.addWidget(graph)
-                self.tab3.setLayout(graphLayout)
+                # graphLayout = QVBoxLayout()
+                # graphLayout.addWidget(graph)
+                # self.tab3.setLayout(graphLayout)
+
+                enterButton1.clicked.connect(lambda: self.createTabs(self.startDate.date().toString('yyyy-MM-dd'), self.endDate.date().toString('yyyy-MM-dd')))
+                #enterButton1.clicked.connect(self.test)
+
 
                 mainLayout.addWidget(self.tabs)
                 self.setLayout(mainLayout)
 
             self.close()
+        def test(self):
+            print("test... please work...")
+
+        def createTabs(self, startDate, endDate):
+            print("createTabs. WTF!!!")
+            if self.hourlyButton.isChecked():
+                dataDict = func.getHourly(startDate)
+            elif self.dailyButton.isChecked():
+                dataDict = func.getDaily(startDate)
+
+            #NEED TO MAKE THESE FUNCS
+            # elif self.weeklyButton.isChecked():
+            #     dataDict = func.getWeekly(startDate, endDate)
+            # elif self.monthlyButton.isChecked():
+            #     dataDict = func.getMonthly(startDate, endDate)
+
+            dataString = func.dictString(dataDict)
+
+            # Create readout tab
+            self.tab4 = QWidget()
+            self.tabs.addTab(self.tab4, "Readout")
+            usageText = QTextEdit(self)
+            usageText.setReadOnly(True)
+            usageText.setFont(font)
+            usageText.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            usageText.setText(dataString)
+
+            readOutLayout = QVBoxLayout()
+            readOutLayout.addWidget(usageText)
+            self.tab4.setLayout(readOutLayout)
+
+            # Create graph tab
+            self.tab5 = QWidget()
+            self.tabs.addTab(self.tab5, "Graph")
+
+            x, y1 = func.dictList(dataDict)
+
+            # Convert datetime.date objects to floating point numbers
+            x_timestamp = [datetime.datetime.fromordinal(date.toordinal()).timestamp() for date in x]
+
+            graph = pg.PlotWidget()
+            graph.showGrid(x=True, y=True)
+            graph.setLabel('bottom', (pullDate + ' - present'))
+            graph.setLabel('left', 'Power Usage (KWh)')
+
+            # Set parameters for graph x-axis
+            axis = pg.DateAxisItem()
+            graph.setAxisItems({'bottom': axis})
+            barGraph = pg.BarGraphItem(x=x_timestamp, height=y1, width=850, brush='c')
+            graph.addItem(barGraph)
+
+            graphLayout = QVBoxLayout()
+            graphLayout.addWidget(graph)
+            self.tab5.setLayout(graphLayout)
 
         def testFunc(self):
             # ARGUMENTS NEEDED: (PULL STARTDATE, PULL ENDDATE, (DATA FORMATED DAILY, WEEKLY, OR MONTHLY))
@@ -257,6 +361,9 @@ try:
             mainGraphLayout.addLayout(graphLayout)
             mainGraphLayout.addLayout(setterLayout)
             self.tab5.setLayout(mainGraphLayout)
+
+        def removeTab(self, index):
+            self.tabs.removeTab(index)
 
 
     class deviceListWindow(QWidget):
