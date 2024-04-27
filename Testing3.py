@@ -1,90 +1,74 @@
-# importing Qt widgets
-from PyQt6.QtWidgets import * 
-import sys
- 
-# importing pyqtgraph as pg
-import pyqtgraph as pg
- 
- 
- 
-class Window(QMainWindow):
- 
-    def __init__(self):
-        super().__init__()
- 
-        # setting title
-        self.setWindowTitle("PyQtGraph")
- 
-        # setting geometry
-        self.setGeometry(100, 100, 600, 500)
- 
-        # calling method
-        self.UiComponents()
- 
-        # showing all the widgets
-        self.show()
- 
-    # method for components
-    def UiComponents(self):
- 
-        # creating a widget object
-        widget = QWidget()
- 
-        # creating a push button object
-        btn = QPushButton('Push Button')
- 
-        # creating a line edit widget
-        text = QLineEdit("Line Edit")
- 
-        # creating a check box widget
-        check = QCheckBox("Check Box")
- 
-        # creating a plot window
-        plot = pg.plot()
- 
-        # create list for y-axis
-        y1 = [5, 5, 7, 10, 3, 8, 9, 1, 6, 2]
- 
-        # create horizontal list i.e x-axis
-        x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
- 
-        # create pyqt5graph bar graph item
-        # with width = 0.6
-        # with bar colors = green
-        bargraph = pg.BarGraphItem(x = x, height = y1, width = 0.6, brush ='g')
- 
-        # add item to plot window
-        # adding bargraph item to the plot window
-        plot.addItem(bargraph)
- 
-        # Creating a grid layout
-        layout = QGridLayout()
- 
-        # setting this layout to the widget
-        widget.setLayout(layout)
- 
-        # adding widgets in the layout in their proper positions
-        # button goes in upper-left
-        layout.addWidget(btn, 0, 0)
- 
-        # text edit goes in middle-left
-        layout.addWidget(text, 1, 0)
- 
-        # check box widget goes in bottom-left
-        layout.addWidget(check, 3, 0)
- 
-        # plot window goes on right side, spanning 3 rows
-        layout.addWidget(plot, 0, 1, 3, 1)
- 
-        # setting this widget as central widget of the main window
-        self.setCentralWidget(widget)
- 
- 
-# create pyqt5 app
-App = QApplication(sys.argv)
- 
-# create the instance of our Window
-window = Window()
- 
-# start the app
-sys.exit(App.exec())
+import os
+import func
+import PyQt6
+
+def testFunc(self):
+            # ARGUMENTS NEEDED: (PULL STARTDATE, PULL ENDDATE, (DATA FORMATED DAILY, WEEKLY, OR MONTHLY))
+            # Collate hourly data
+            dataDict = func.getHourly(pullDate)
+            dataString = func.dictStringHourly(dataDict)
+
+            # Create hourly readout tab
+            self.tab4 = QWidget()
+            self.tabs.addTab(self.tab4, "Hourly Printout")
+            usageText = QTextEdit(self)
+            usageText.setReadOnly(True)
+            usageText.setFont(font)
+            usageText.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            usageText.setText(dataString)
+
+            readOutLayout = QVBoxLayout()
+            readOutLayout.addWidget(usageText)
+            self.tab4.setLayout(readOutLayout)
+
+            # Create hourly graph tab
+            self.tab5 = QWidget()
+            self.tabs.addTab(self.tab5, "Hourly Graph")
+
+            x, y1 = func.dictList(dataDict)
+
+            # Convert datetime.datetime objects to timestamps
+            x_timestamp = [dateHour.timestamp() for dateHour in x]
+
+            graph = pg.PlotWidget()
+            graph.showGrid(x=True, y=True)
+            graph.setLabel('bottom', (pullDate + ' - present'))
+            graph.setLabel('left', 'Power Usage (KWh)')
+
+            # Create a dropdown menu to select the max Y value for the graph
+            maxYselector = QComboBox()
+            maxYselector.addItems(['0.5', '1', '2', '3', '4', '5'])
+
+            # Get the max value for the Y axis
+            maxVal = 0
+            for val in dataDict.values():
+                if val / 1000 > maxVal:
+                    maxVal = val / 1000
+            print(maxVal)
+
+            # Create an auto-resize button for y-axis
+            autoResizeButton = QPushButton("Resize")
+            autoResizeButton.setFont(font)
+            autoResizeButton.clicked.connect(lambda: graph.setYRange(0, maxVal))
+
+            # Set parameters for graph x-axis
+            axis = pg.DateAxisItem()
+            graph.setAxisItems({'bottom': axis})
+            barGraph = pg.BarGraphItem(x=x_timestamp, height=y1, width=850, brush='c')
+            graph.addItem(barGraph)
+
+            maxYselector.currentIndexChanged.connect(lambda: graph.setYRange(0, float(maxYselector.currentText())))
+
+            
+
+
+            mainGraphLayout = QHBoxLayout()
+            graphLayout = QVBoxLayout()
+            setterLayout = QVBoxLayout()
+            graphLayout.addWidget(graph)
+            setterLayout.addWidget(autoResizeButton)
+            setterLayout.addWidget(maxYselector)
+            setterLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            mainGraphLayout.addLayout(graphLayout)
+            mainGraphLayout.addLayout(setterLayout)
+            self.tab5.setLayout(mainGraphLayout)
