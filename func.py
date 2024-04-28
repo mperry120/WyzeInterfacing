@@ -3,6 +3,7 @@ import datetime
 import wyze_sdk
 from wyze_sdk import Client
 from wyze_sdk.errors import WyzeApiError
+from dateutil.relativedelta import relativedelta, MO, SU
 
 
 #Will need to create a setter function to pull all these values from the GUI
@@ -44,9 +45,6 @@ def getHourly(date):
         #aggragate data
         for date, value in wyzeRec.hourly_data.items():
             newDict[date] += value
-        #print data
-        # for key, value in newDict.items():
-        #     print(f"{key}: {value / 1000} KWh")
     return newDict
 
 #Returns daily usage dict of format: {datetime.date: int}
@@ -59,12 +57,30 @@ def getDaily(date):
         for date, value in wyzeRec.hourly_data.items():
             day = date.date()
             newDict[day] += value
-    #print data
-    # for key, value in newDict.items():
-    #     string = key.strftime('%m/%d/%Y')
-    #     print(f"{string}:{value / 1000} KWh")
     return newDict
 
+#Returns weekly usage dict of format: {(datetime.date, datetime.date): int}
+def getWeekly(data):
+    plugRecs = getUsageData(data)
+    newDict = defaultdict(int)
+    #make list
+    for wyzeRec in plugRecs:
+        #aggragate data
+        for date, value in wyzeRec.hourly_data.items():
+            week = (date.year, date.date().isocalendar()[1])
+            newDict[week] += value
+    return newDict
+
+def getMonthly(data):
+    plugRecs = getUsageData(data)
+    newDict = defaultdict(int)
+    #make list
+    for wyzeRec in plugRecs:
+        #aggragate data
+        for date, value in wyzeRec.hourly_data.items():
+            month = date.replace(day=1).replace(hour=0)
+            newDict[month] += value
+    return newDict
 
 #Create string
 def dictString(dict):
@@ -96,6 +112,38 @@ def dictStringHourly(dict):
             rtrnString += (f"{key.strftime('%d %a %I%p'):12}- {value / 1000:>8} KWh\n")
             month = key.strftime('%m')
     
+    return rtrnString.replace('-     ', '------').replace('-    ', '-----').replace('-   ', '----')
+
+#Create string for weekly printout
+def dictStringWeekly(dict):
+    rtrnString = ''
+    monthParser = list(dict.keys())
+    #Get the first key in dict
+    firstKey = list(monthParser[0])
+    #Unpack the key into year and week
+    year, week = firstKey
+    #Convert year and week into a date
+    firstDate = datetime.datetime.strptime(f'{year}-{week}-1', '%Y-%W-%w').date()
+
+    month = firstDate.strftime('%m')
+    rtrnString = firstDate.strftime('%B %Y') + '\n'
+    for key, value in dict.items():
+        year, week = key
+        currentDate = datetime.datetime.strptime(f'{year}-{week}-1', '%Y-%W-%w').date()
+        if currentDate.strftime('%m') != month:
+            rtrnString += (f"\n{currentDate.strftime('%B %Y')}\n{formatWeek(year, week):<15}- {value / 1000:>8} KWh\n")
+            month = currentDate.strftime('%m')
+        else:
+            rtrnString += (f"{formatWeek(year, week):<15}- {value / 1000:>8} KWh\n")
+            month = currentDate.strftime('%m')
+    
+    return rtrnString.replace('-     ', '------').replace('-    ', '-----').replace('-   ', '----')
+
+#Create string for monthly printout
+def dictStringMonthly(dict):
+    rtrnString = ''
+    for key, value in dict.items():
+        rtrnString += (f"{key.strftime('%B %Y'):8}- {value / 1000:>8} KWh\n")
     return rtrnString.replace('-     ', '------').replace('-    ', '-----').replace('-   ', '----')
 
 #Create list from dict
@@ -230,3 +278,13 @@ def float_range(start, stop, step):
     while start < stop:
         yield start
         start += step
+
+def formatWeek(year, week):
+    # Calculate the date of the Monday of the week
+    mon = datetime.datetime.strptime(f'{year}-W{week}-1', "%Y-W%W-%w").date()
+
+    # Calculate the date of the Sunday of the week
+    sun = mon + relativedelta(weekday=SU)
+
+    # Format the dates into a string
+    return f'MON {mon.day:>2} - SUN {sun.day:>2}'
