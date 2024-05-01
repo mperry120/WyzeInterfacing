@@ -37,49 +37,57 @@ def getUsageData(date):
     return PlugRecords
 
 #Returns hourly usage dict of format: {datetime.datetime: int}
-def getHourly(date):
+def getHourly(date, endDate):
+    eDate = datetime.datetime.strptime(endDate, '%Y-%m-%d')
     plugRecs = getUsageData(date)
     newDict = defaultdict(int)
     #make list
     for wyzeRec in plugRecs:
         #aggragate data
         for date, value in wyzeRec.hourly_data.items():
-            newDict[date] += value
+            if date.day <= eDate.day and date.month <= eDate.month and date.year <= eDate.year:
+                newDict[date] += value
     return newDict
 
 #Returns daily usage dict of format: {datetime.date: int}
-def getDaily(date):
+def getDaily(date, endDate):
+    eDate = datetime.datetime.strptime(endDate, '%Y-%m-%d')
     plugRecs = getUsageData(date)
     newDict = defaultdict(int)
     #make list
     for wyzeRec in plugRecs:
         #aggragate data
         for date, value in wyzeRec.hourly_data.items():
-            day = date.date()
-            newDict[day] += value
+            if date.day <= eDate.day and date.month <= eDate.month and date.year <= eDate.year:
+                day = date.date()
+                newDict[day] += value
     return newDict
 
 #Returns weekly usage dict of format: {(datetime.date, datetime.date): int}
-def getWeekly(data):
+def getWeekly(data, endDate):
+    eDate = datetime.datetime.strptime(endDate, '%Y-%m-%d')
     plugRecs = getUsageData(data)
     newDict = defaultdict(int)
     #make list
     for wyzeRec in plugRecs:
         #aggragate data
         for date, value in wyzeRec.hourly_data.items():
-            week = (date.year, date.date().isocalendar()[1])
-            newDict[week] += value
+            if date.day <= eDate.day and date.month <= eDate.month and date.year <= eDate.year:
+                week = (date.year, date.date().isocalendar()[1])
+                newDict[week] += value
     return newDict
 
-def getMonthly(data):
+def getMonthly(data, endDate):
+    eDate = datetime.datetime.strptime(endDate, '%Y-%m-%d')
     plugRecs = getUsageData(data)
     newDict = defaultdict(int)
     #make list
     for wyzeRec in plugRecs:
         #aggragate data
         for date, value in wyzeRec.hourly_data.items():
-            month = date.replace(day=1).replace(hour=0)
-            newDict[month] += value
+            if date.day <= eDate.day and date.month <= eDate.month and date.year <= eDate.year:
+                month = date.replace(day=1).replace(hour=0)
+                newDict[month] += value
     return newDict
 
 #Create string

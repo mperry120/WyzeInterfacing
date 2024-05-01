@@ -36,9 +36,12 @@ try:
 
 
     #ADD FUNCTIONALITY FOR SELECTABLE END DATE FOR DATA PULL.
+        #DONE, HOWEVER THE WEEKLY READOUT IS QUIRKY..
+
+
     #ADD (OPTIONAL?) FUNCTIONALITY OF PEAK HOURS/OFF PEAK HOURS SUMS.
     #ADD A GRAPHIC OR LOGO.
-    #ADD A LINK TO THE WYPE API KEY PAGE.
+    #ADD A LINK TO THE WYZE API KEY PAGE.
     #ADD FUNCTIONALITY TO CREDENTIALS ENTRY & REMEMBER TO HANDLE EXCEPTIONS.
     class usageWindow(QWidget):
         def __init__(self, mac, xCoord, yCoord):
@@ -64,18 +67,6 @@ try:
                 self.setWindowTitle("Wyze Data Portal - Power Usage")
                 self.setGeometry(xCoord + 220, yCoord + 30, 600, 400)
                 self.setContentsMargins(20, 20, 20, 20)
-
-
-                dataDict = func.getDaily(pullDate)
-                dataString = func.dictString(dataDict)
-                #TESTING
-                print(dataString)
-                #TESTING
-
-                x, y1 = func.dictList(dataDict)
-
-                # Convert datetime.date objects to floating point numbers
-                x_timestamp = [datetime.datetime.fromordinal(date.toordinal()).timestamp() for date in x]
 
 
                 mainLayout = QVBoxLayout()
@@ -198,38 +189,6 @@ try:
 
 
 
-
-                #ReadOut Tab
-                # usageText = QTextEdit(self)
-                # usageText.setReadOnly(True)
-                # usageText.setFont(font)
-                # usageText.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                # usageText.setText(dataString)
-
-                # readOutLayout = QVBoxLayout()
-                # readOutLayout.addWidget(usageText)
-                # self.tab2.setLayout(readOutLayout)
-
-
-
-                #Graph Tab
-                # graph = pg.PlotWidget()
-                # graph.showGrid(x=True, y=True)
-                # gphTitle = 'Power Usage'
-                # graph.setLabel('bottom', (pullDate + ' - present'))
-                # graph.setLabel('left', 'Power Usage (KWh)')
-
-                # axis = pg.DateAxisItem()
-                # graph.setAxisItems({'bottom': axis})
-
-                # barGraph = pg.BarGraphItem(x=x_timestamp, height=y1, width=50000, brush='c')
-                # graph.addItem(barGraph)
-
-
-                # graphLayout = QVBoxLayout()
-                # graphLayout.addWidget(graph)
-                # self.tab3.setLayout(graphLayout)
-
                 # Enter button clicked
                 enterButton1.clicked.connect(self.checkDates)
 
@@ -263,19 +222,19 @@ try:
             # try:
             format = None
             if self.hourlyButton.isChecked():
-                dataDict = func.getHourly(startDate)
+                dataDict = func.getHourly(startDate, endDate)
                 dataString = func.dictStringHourly(dataDict)
                 format = "Hourly"
             elif self.dailyButton.isChecked():
-                dataDict = func.getDaily(startDate)
+                dataDict = func.getDaily(startDate, endDate)
                 dataString = func.dictString(dataDict)
                 format = "Daily"
             elif self.weeklyButton.isChecked():
-                dataDict = func.getWeekly(startDate)
+                dataDict = func.getWeekly(startDate, endDate)
                 dataString = func.dictStringWeekly(dataDict)
                 format = "Weekly"
             elif self.monthlyButton.isChecked():
-                dataDict = func.getMonthly(startDate)
+                dataDict = func.getMonthly(startDate, endDate)
                 dataString = func.dictStringMonthly(dataDict)
                 format = "Monthly"
 
