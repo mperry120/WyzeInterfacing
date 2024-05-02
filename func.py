@@ -4,6 +4,7 @@ import wyze_sdk
 from wyze_sdk import Client
 from wyze_sdk.errors import WyzeApiError
 from dateutil.relativedelta import relativedelta, MO, SU
+import calendar
 
 
 #Will need to create a setter function to pull all these values from the GUI
@@ -38,54 +39,88 @@ def getUsageData(date):
 
 #Returns hourly usage dict of format: {datetime.datetime: int}
 def getHourly(date, endDate):
-    eDate = datetime.datetime.strptime(endDate, '%Y-%m-%d')
-    plugRecs = getUsageData(date)
+    #changes
+    startDate = datetime.datetime.strptime(date, '%Y-%m-%d')
+    dayDelta = datetime.timedelta(days=1)
+    pullDate = startDate - dayDelta
+    sDate = startDate.replace(hour=0)
+    
+    tempDate = datetime.datetime.strptime(endDate, '%Y-%m-%d')
+    eDate = tempDate.replace(hour=23)
+    
+    #changes
+    plugRecs = getUsageData(pullDate.strftime('%Y-%m-%d'))
+    
     newDict = defaultdict(int)
     #make list
     for wyzeRec in plugRecs:
         #aggragate data
         for date, value in wyzeRec.hourly_data.items():
-            if date.day <= eDate.day and date.month <= eDate.month and date.year <= eDate.year:
+            #changes
+            if date <= eDate and date >= sDate:
+
                 newDict[date] += value
     return newDict
 
 #Returns daily usage dict of format: {datetime.date: int}
 def getDaily(date, endDate):
-    eDate = datetime.datetime.strptime(endDate, '%Y-%m-%d')
-    plugRecs = getUsageData(date)
+    startDate = datetime.datetime.strptime(date, '%Y-%m-%d')
+    dayDelta = datetime.timedelta(days=1)
+    pullDate = startDate - dayDelta
+    sDate = startDate.replace(hour=0)
+
+    tempDate = datetime.datetime.strptime(endDate, '%Y-%m-%d')
+    eDate = tempDate.replace(hour=23)
+
+    plugRecs = getUsageData(pullDate.strftime('%Y-%m-%d'))
+                            
     newDict = defaultdict(int)
     #make list
     for wyzeRec in plugRecs:
         #aggragate data
         for date, value in wyzeRec.hourly_data.items():
-            if date.day <= eDate.day and date.month <= eDate.month and date.year <= eDate.year:
+            if date <= eDate and date >= sDate:
                 day = date.date()
                 newDict[day] += value
     return newDict
 
 #Returns weekly usage dict of format: {(datetime.date, datetime.date): int}
-def getWeekly(data, endDate):
-    eDate = datetime.datetime.strptime(endDate, '%Y-%m-%d')
-    plugRecs = getUsageData(data)
+def getWeekly(date, endDate):
+    startDate = datetime.datetime.strptime(date, '%Y-%m-%d')
+    dayDelta = datetime.timedelta(days=1)
+    pullDate = startDate - dayDelta
+    sDate = startDate.replace(hour=0)
+
+    tempDate = datetime.datetime.strptime(endDate, '%Y-%m-%d')
+    eDate = tempDate.replace(hour=23)
+
+    plugRecs = getUsageData(pullDate.strftime('%Y-%m-%d'))
+
     newDict = defaultdict(int)
     #make list
     for wyzeRec in plugRecs:
         #aggragate data
         for date, value in wyzeRec.hourly_data.items():
-            if date.day <= eDate.day and date.month <= eDate.month and date.year <= eDate.year:
+            if date <= eDate and date >= sDate:
                 week = (date.year, date.date().isocalendar()[1])
                 newDict[week] += value
     return newDict
 
-def getMonthly(data, endDate):
-    eDate = datetime.datetime.strptime(endDate, '%Y-%m-%d')
-    plugRecs = getUsageData(data)
+def getMonthly(date, endDate):
+    startDate = datetime.datetime.strptime(date, '%Y-%m-%d')
+    dayDelta = datetime.timedelta(days=1)
+    pullDate = startDate - dayDelta
+    sDate = startDate.replace(hour=0)
+
+    tempDate = datetime.datetime.strptime(endDate, '%Y-%m-%d')
+    eDate = tempDate.replace(hour=23)
+    plugRecs = getUsageData(pullDate.strftime('%Y-%m-%d'))
     newDict = defaultdict(int)
     #make list
     for wyzeRec in plugRecs:
         #aggragate data
         for date, value in wyzeRec.hourly_data.items():
-            if date.day <= eDate.day and date.month <= eDate.month and date.year <= eDate.year:
+            if date <= eDate and date >= sDate:
                 month = date.replace(day=1).replace(hour=0)
                 newDict[month] += value
     return newDict
@@ -296,3 +331,4 @@ def formatWeek(year, week):
 
     # Format the dates into a string
     return f'MON {mon.day:>2} - SUN {sun.day:>2}'
+
