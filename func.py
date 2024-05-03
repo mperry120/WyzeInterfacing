@@ -52,14 +52,18 @@ def getHourly(date, endDate):
     plugRecs = getUsageData(pullDate.strftime('%Y-%m-%d'))
     
     newDict = defaultdict(int)
-    #make list
+    onPeakTotal = 0
+    offPeakTotal = 0
     for wyzeRec in plugRecs:
-        #aggragate data
         for date, value in wyzeRec.hourly_data.items():
-            #changes
             if date <= eDate and date >= sDate:
-
+                if date.hour >= 16 and date.hour <= 21:
+                    onPeakTotal += value
+                else:
+                    offPeakTotal += value
                 newDict[date] += value
+    newDict['onPeak'] = onPeakTotal
+    newDict['offPeak'] = offPeakTotal
     return newDict
 
 #Returns daily usage dict of format: {datetime.date: int}
@@ -68,20 +72,28 @@ def getDaily(date, endDate):
     dayDelta = datetime.timedelta(days=1)
     pullDate = startDate - dayDelta
     sDate = startDate.replace(hour=0)
-
     tempDate = datetime.datetime.strptime(endDate, '%Y-%m-%d')
     eDate = tempDate.replace(hour=23)
-
-    plugRecs = getUsageData(pullDate.strftime('%Y-%m-%d'))
-                            
+    plugRecs = getUsageData(pullDate.strftime('%Y-%m-%d'))                     
     newDict = defaultdict(int)
+    #new variables for peak and offPeak
+    onPeakTotal = 0
+    offPeakTotal = 0
     #make list
     for wyzeRec in plugRecs:
         #aggragate data
         for date, value in wyzeRec.hourly_data.items():
             if date <= eDate and date >= sDate:
+                #Aggragate peak and offPeak hour values
+                if date.hour >= 16 and date.hour <= 21:
+                    onPeakTotal += value
+                else:
+                    offPeakTotal += value
                 day = date.date()
                 newDict[day] += value
+    #Add peak and offPeak to dict
+    newDict['onPeak'] = onPeakTotal
+    newDict['offPeak'] = offPeakTotal
     return newDict
 
 #Returns weekly usage dict of format: {(datetime.date, datetime.date): int}
@@ -90,20 +102,23 @@ def getWeekly(date, endDate):
     dayDelta = datetime.timedelta(days=1)
     pullDate = startDate - dayDelta
     sDate = startDate.replace(hour=0)
-
     tempDate = datetime.datetime.strptime(endDate, '%Y-%m-%d')
     eDate = tempDate.replace(hour=23)
-
     plugRecs = getUsageData(pullDate.strftime('%Y-%m-%d'))
-
     newDict = defaultdict(int)
-    #make list
+    onPeakTotal = 0
+    offPeakTotal = 0
     for wyzeRec in plugRecs:
-        #aggragate data
         for date, value in wyzeRec.hourly_data.items():
             if date <= eDate and date >= sDate:
+                if date.hour >= 16 and date.hour <= 21:
+                    onPeakTotal += value
+                else:
+                    offPeakTotal += value
                 week = (date.year, date.date().isocalendar()[1])
                 newDict[week] += value
+    newDict['onPeak'] = onPeakTotal
+    newDict['offPeak'] = offPeakTotal
     return newDict
 
 def getMonthly(date, endDate):
@@ -111,22 +126,31 @@ def getMonthly(date, endDate):
     dayDelta = datetime.timedelta(days=1)
     pullDate = startDate - dayDelta
     sDate = startDate.replace(hour=0)
-
     tempDate = datetime.datetime.strptime(endDate, '%Y-%m-%d')
     eDate = tempDate.replace(hour=23)
     plugRecs = getUsageData(pullDate.strftime('%Y-%m-%d'))
     newDict = defaultdict(int)
-    #make list
+    onPeakTotal = 0
+    offPeakTotal = 0
     for wyzeRec in plugRecs:
         #aggragate data
         for date, value in wyzeRec.hourly_data.items():
             if date <= eDate and date >= sDate:
+                if date.hour >= 16 and date.hour <= 21:
+                    onPeakTotal += value
+                else:
+                    offPeakTotal += value
                 month = date.replace(day=1).replace(hour=0)
                 newDict[month] += value
+    newDict['onPeak'] = onPeakTotal
+    newDict['offPeak'] = offPeakTotal
     return newDict
 
-#Create string
+#Create string for daily printout
+#Peak hours are 4pm to 9pm
 def dictString(dict):
+    onPeak = dict.pop('onPeak')
+    offPeak = dict.pop('offPeak')
     rtrnString = ''
     monthParser = list(dict.keys())
     month = monthParser[0].strftime('%m')
@@ -138,11 +162,15 @@ def dictString(dict):
         else:
             rtrnString += (f"{key.strftime('%d %a'):8}- {value / 1000:>8} KWh\n")
             month = key.strftime('%m')
+        
+    rtrnString += (f"\n{'Peak Total':15}- {onPeak / 1000:>8} KWh\n{'Off Peak Total':15}- {offPeak / 1000:>8} KWh\n")
     return rtrnString.replace(' -', '--').replace('-     ', '------').replace('-    ', '-----').replace('-   ', '----')
 
 
-#Create string for daily printout
+#Create string for hourly printout
 def dictStringHourly(dict):
+    onPeak = dict.pop('onPeak')
+    offPeak = dict.pop('offPeak')
     rtrnString = ''
     monthParser = list(dict.keys())
     month = monthParser[0].strftime('%m')
@@ -154,11 +182,14 @@ def dictStringHourly(dict):
         else:
             rtrnString += (f"{key.strftime('%d %a %I%p'):12}- {value / 1000:>8} KWh\n")
             month = key.strftime('%m')
-    
+    rtrnString += (f"\n{'Peak Total':15}- {onPeak / 1000:>8} KWh\n{'Off Peak Total':15}- {offPeak / 1000:>8} KWh\n")
     return rtrnString.replace('-     ', '------').replace('-    ', '-----').replace('-   ', '----')
 
 #Create string for weekly printout
 def dictStringWeekly(dict):
+    #Create variables for onPeak and offPeak and delete them from dict.. which is a reference to the original dict.. who knew?
+    onPeak = dict.pop('onPeak')
+    offPeak = dict.pop('offPeak')
     rtrnString = ''
     monthParser = list(dict.keys())
     #Get the first key in dict
@@ -179,14 +210,17 @@ def dictStringWeekly(dict):
         else:
             rtrnString += (f"{formatWeek(year, week):<15}- {value / 1000:>8} KWh\n")
             month = currentDate.strftime('%m')
-    
+    rtrnString += (f"\n{'Peak Total':15}- {onPeak / 1000:>8} KWh\n{'Off Peak Total':15}- {offPeak / 1000:>8} KWh\n")
     return rtrnString.replace('-     ', '------').replace('-    ', '-----').replace('-   ', '----')
 
 #Create string for monthly printout
 def dictStringMonthly(dict):
+    onPeak = dict.pop('onPeak')
+    offPeak = dict.pop('offPeak')
     rtrnString = ''
     for key, value in dict.items():
-        rtrnString += (f"{key.strftime('%B %Y'):8}- {value / 1000:>8} KWh\n")
+        rtrnString += (f"{key.strftime('%B %Y'):15}- {value / 1000:>8} KWh\n")
+    rtrnString += (f"\n{'Peak Total':15}- {onPeak / 1000:>8} KWh\n{'Off Peak Total':15}- {offPeak / 1000:>8} KWh\n")
     return rtrnString.replace('-     ', '------').replace('-    ', '-----').replace('-   ', '----')
 
 #Create list from dict
