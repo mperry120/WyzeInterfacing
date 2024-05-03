@@ -12,6 +12,7 @@ from pyqtgraph.Qt import QtCore, QtGui
 import numpy as np
 from PyQt6.QtCore import QDate
 from PyQt6.QtWidgets import QDateEdit
+import requests.exceptions
 
 
 
@@ -35,16 +36,10 @@ try:
 
 
 
-    #ADD FUNCTIONALITY FOR SELECTABLE END DATE FOR DATA PULL.
-        #DONE, HOWEVER THE WEEKLY READOUT IS QUIRKY..
-            #Wasn't done. Was full of bugs. But now it'd really done.. Maybe.. the funk do I know?
-
-
-    #ADD (OPTIONAL?) FUNCTIONALITY OF PEAK HOURS/OFF PEAK HOURS SUMS. this one next.
 
     #ADD A GRAPHIC OR LOGO.
-    #ADD A LINK TO THE WYZE API KEY PAGE.
-    #ADD FUNCTIONALITY TO CREDENTIALS ENTRY & REMEMBER TO HANDLE EXCEPTIONS.
+
+
     class usageWindow(QWidget):
         def __init__(self, mac, xCoord, yCoord):
             super().__init__()
@@ -696,6 +691,38 @@ try:
             hBox.addWidget(button, alignment=Qt.AlignmentFlag.AlignLeft)
             BottomLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
+
+
+            # Create discriptive link to Wyze API Key page
+            hBox2 = QHBoxLayout()
+            hBox2.addWidget(QLabel("You can generate a Wyze API key here:"), alignment=Qt.AlignmentFlag.AlignCenter)
+            hBox3 = QHBoxLayout()
+            wyzeLink = QLabel()
+            wyzeLink.setOpenExternalLinks(True)
+            wyzeLink.setTextFormat(Qt.TextFormat.RichText)
+            wyzeLink.setText('<a href="https://developer-api-console.wyze.com/#/apikey/view">Wyze API Key</a>')
+            wyzeLink.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            hBox3.addWidget(wyzeLink)
+
+            BottomLayout.addSpacing(45)
+            BottomLayout.addLayout(hBox2)
+            BottomLayout.addLayout(hBox3)
+
+            # Create another link for additional help
+            hBox4 = QHBoxLayout()
+            hBox4.addWidget(QLabel('You can find additional instructions here:'), alignment=Qt.AlignmentFlag.AlignCenter)
+            hBox5 = QHBoxLayout()
+            helpLink = QLabel()
+            helpLink.setOpenExternalLinks(True)
+            helpLink.setTextFormat(Qt.TextFormat.RichText)
+            helpLink.setText('<a href="https://support.wyze.com/hc/en-us/articles/16129834216731-Creating-an-API-Key">Help</a>')
+            helpLink.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            hBox5.addWidget(helpLink)
+
+            BottomLayout.addSpacing(10)
+            BottomLayout.addLayout(hBox4)
+            BottomLayout.addLayout(hBox5)
+
             button.clicked.connect(self.pressEnter)
 
 
@@ -730,12 +757,31 @@ try:
                 f = open("SaveData.txt", "w")
                 f.write("")
                 f.close()
-            xCoord = self.geometry().getCoords()[0]
-            yCoord = self.geometry().getCoords()[1]
-            self.deviceListWindow = deviceListWindow(xCoord, yCoord)
-            self.deviceListWindow.show()
-            #Seems to work, but I'm not sure if it's the best way to do it
-            self.window().close()
+            try:
+                func.setClient(self.email.text(), self.password.text(), self.key_id.text(), self.api_key.text())
+                xCoord = self.geometry().getCoords()[0]
+                yCoord = self.geometry().getCoords()[1]
+                self.deviceListWindow = deviceListWindow(xCoord, yCoord)
+                self.deviceListWindow.show()
+                #Seems to work, but I'm not sure if it's the best way to do it
+                self.window().close()
+
+            except WyzeApiError as e:
+                s = str(e)
+                print("Got Problems")
+                print(s)
+            
+            except requests.exceptions.HTTPError as e:
+                print("HTTP Error occurred:", e)
+                print("Invalid credentials provided.")
+
+                error_box = QMessageBox()
+                error_box.setIcon(QMessageBox.Icon.Critical)
+                error_box.setWindowTitle("Error")
+                error_box.setText('Invalid Credentials')
+                error_box.exec()
+            
+            
             
         
 

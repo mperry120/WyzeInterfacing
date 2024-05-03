@@ -7,12 +7,16 @@ from dateutil.relativedelta import relativedelta, MO, SU
 import calendar
 
 
-#Will need to create a setter function to pull all these values from the GUI
-client = Client(
-    email = 'mperry120@gmail.com',
-    password = 'ziJfym-fodsaq-ribwo6',
-    key_id ='0cf980f9-364e-44a5-9471-8ac8ec5fb6ff',
-    api_key = 'XLMyd6F1Zs92SedNfGCrEs4a2l2oHnNwnMQx1YPxN9h2TZXR23gwz8avWYN7')
+client = None
+
+def setClient(argEmail, argPassword, argkeyID, argApiKey):
+    global client
+    client = Client(
+        email = argEmail,
+        password = argPassword,
+        key_id = argkeyID,
+        api_key = argApiKey
+    )
 
 #Set global variables
 outdoorPlug = None
