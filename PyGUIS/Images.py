@@ -13,7 +13,9 @@ class Window(QWidget):
 
     def UI(self):
         self.image = QLabel(self)
-        self.image.setPixmap(QPixmap('PyGUIS/Images/PythonLogo.png'))
+        self.image.setPixmap(QPixmap('Widgets/WyzeLogo.PNG'))
+        self.image.setScaledContents(True)
+        self.image.setGeometry(10, 10, 200, 200)
         self.image.move(10, 10)
         removeButton = QPushButton("Remove", self)
         removeButton.move(10, 200)

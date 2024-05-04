@@ -13,6 +13,7 @@ import numpy as np
 from PyQt6.QtCore import QDate
 from PyQt6.QtWidgets import QDateEdit
 import requests.exceptions
+from PyQt6.QtGui import QPixmap
 
 
 
@@ -30,14 +31,6 @@ errorFont = QFont("Times", 12, QFont.Weight.Bold)
 
 try:
 
-
-
-
-
-
-
-
-    #ADD A GRAPHIC OR LOGO.
 
 
     class usageWindow(QWidget):
@@ -585,6 +578,15 @@ try:
             leftLayout.addWidget(self.deviceList)
             self.deviceList.setText(func.getDeviceList())
 
+            # Add Logo
+            image = QLabel(self)
+            pixmap = QPixmap('Widgets/WyzeLogo.PNG')
+            scaled_pixmap = pixmap.scaled(150, 150)
+            image.setPixmap(scaled_pixmap)
+            logoHBox = QHBoxLayout()
+            logoHBox.addWidget(image, alignment=Qt.AlignmentFlag.AlignCenter)
+            rightLayout.addLayout(logoHBox)
+
             self.infoLabel = QLabel("Currently, the only devices\nsupported are the Outdoor Plugs\nModel: WLPP0")
             self.infoLabel.setFont(font)
             self.infoLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -693,6 +695,23 @@ try:
 
 
 
+
+
+
+            # self.image = QLabel(self)
+            # self.image.setPixmap(QPixmap('Widgets/WyzeLogo.PNG'))
+            # self.image.setScaledContents(True)
+
+
+            image = QLabel(self)
+            pixmap = QPixmap('Widgets/WyzeLogo.PNG')
+            scaled_pixmap = pixmap.scaled(50, 50)
+            image.setPixmap(scaled_pixmap)
+            logoHBox = QHBoxLayout()
+            logoHBox.addWidget(image, alignment=Qt.AlignmentFlag.AlignCenter)
+            BottomLayout.addLayout(logoHBox)
+
+
             # Create discriptive link to Wyze API Key page
             hBox2 = QHBoxLayout()
             hBox2.addWidget(QLabel("You can generate a Wyze API key here:"), alignment=Qt.AlignmentFlag.AlignCenter)
@@ -704,7 +723,6 @@ try:
             wyzeLink.setAlignment(Qt.AlignmentFlag.AlignCenter)
             hBox3.addWidget(wyzeLink)
 
-            BottomLayout.addSpacing(45)
             BottomLayout.addLayout(hBox2)
             BottomLayout.addLayout(hBox3)
 
