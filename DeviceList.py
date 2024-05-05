@@ -14,7 +14,11 @@ from PyQt6.QtCore import QDate
 from PyQt6.QtWidgets import QDateEdit
 import requests.exceptions
 from PyQt6.QtGui import QPixmap
+from PyQt6.QtGui import QIcon
 
+
+
+# PEAK HOURS USER SELECTION IS NOT FUNCTIONAL
 
 
 #Set date to pull data from
@@ -43,6 +47,8 @@ try:
                 #self.setGeometry(350, 150, 225, 100)
                 self.setGeometry(xCoord + 200, yCoord + 100, 225, 100)
                 self.setContentsMargins(20, 20, 20, 20)
+                self.setWindowIcon(QIcon('Widgets/WyzeLogo.PNG'))
+
                 mainLayout = QVBoxLayout()
                 errorMessage = QLabel("Device not found")
                 errorMessage.setStyleSheet("color: red")
@@ -57,7 +63,7 @@ try:
                 self.setWindowTitle("Wyze Data Portal - Power Usage")
                 self.setGeometry(xCoord + 220, yCoord + 30, 600, 400)
                 self.setContentsMargins(20, 20, 20, 20)
-
+                self.setWindowIcon(QIcon('Widgets/WyzeLogo.PNG'))
 
                 mainLayout = QVBoxLayout()
                 self.tabs = QTabWidget()
@@ -129,6 +135,7 @@ try:
                 buttonGroup.addButton(self.dailyButton)
                 buttonGroup.addButton(self.weeklyButton)
                 buttonGroup.addButton(self.monthlyButton)
+                self.dailyButton.setChecked(True)
 
                 #Add buttons to the layout
                 centerVvLayout1.addWidget(self.hourlyButton)
@@ -136,7 +143,31 @@ try:
                 centerVvLayout1.addWidget(self.weeklyButton)
                 centerVvLayout1.addWidget(self.monthlyButton)
 
-
+                #Create Start/End date labels and date selectors
+                peakHourStart = QComboBox()
+                peakHourStop = QComboBox()
+                for i in range(0, 24):
+                    peakHourStart.addItem(str(i))
+                    peakHourStop.addItem(str(i))
+                centerVvLayout1.addWidget(peakHourStart)
+                centerVvLayout1.addWidget(peakHourStop)
+                peakHourStart.setCurrentIndex(16)
+                peakHourStop.setCurrentIndex(20)
+                peakStartHBox = QHBoxLayout()
+                peakStopHBox = QHBoxLayout()
+                peakHoursLabelHbox = QHBoxLayout()
+                peakHoursLabel = QLabel("Peak Hours")
+                peakHoursLabel.setFont(font)
+                peakHoursLabelHbox.addWidget(peakHoursLabel)
+                peakStartHBox.addWidget(QLabel("Start"))
+                peakStartHBox.addWidget(peakHourStart)
+                peakStopHBox.addWidget(QLabel("End"))
+                peakStopHBox.addWidget(peakHourStop)
+                peakHoursLabelHbox.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                centerVvLayout1.addSpacing(20)
+                centerVvLayout1.addLayout(peakHoursLabelHbox)
+                centerVvLayout1.addLayout(peakStartHBox)
+                centerVvLayout1.addLayout(peakStopHBox)
 
                 #Create Enter button and align to the center of the tab
                 enterButton1 = QPushButton("Enter")
@@ -144,10 +175,6 @@ try:
                 centerVHLayout3.addWidget(enterButton1)
                 centerVHLayout3.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 enterButton1.setMaximumWidth(100)
-
-                #PHASE OUT
-                #enterButton.clicked.connect(self.testFunc)
-                #PHASE OUT
 
 
 
@@ -163,6 +190,7 @@ try:
                 self.startDate.setFixedWidth(200)
                 self.startDate.setMaximumDate(QDate.currentDate())
                 leftLayout.addWidget(self.startDate)
+
 
                 #Right Layout
                 startDateLabel = QLabel("End Date")
@@ -205,291 +233,30 @@ try:
                 self.createTabs(self.startDate.date().toString('yyyy-MM-dd'), self.endDate.date().toString('yyyy-MM-dd'))
 
 
-        def test(self):
-            print("test... please work...")
-
         def createTabs(self, startDate, endDate):
-            # try:
-            format = None
-            if self.hourlyButton.isChecked():
-                dataDict = func.getHourly(startDate, endDate)
-                dataString = func.dictStringHourly(dataDict)
-                format = "Hourly"
-            elif self.dailyButton.isChecked():
-                dataDict = func.getDaily(startDate, endDate)
-                dataString = func.dictString(dataDict)
-                format = "Daily"
-            elif self.weeklyButton.isChecked():
-                dataDict = func.getWeekly(startDate, endDate)
-                dataString = func.dictStringWeekly(dataDict)
-                format = "Weekly"
-            elif self.monthlyButton.isChecked():
-                dataDict = func.getMonthly(startDate, endDate)
-                dataString = func.dictStringMonthly(dataDict)
-                format = "Monthly"
+            try:
+                format = None
+                if self.hourlyButton.isChecked():
+                    dataDict = func.getHourly(startDate, endDate)
+                    dataString = func.dictStringHourly(dataDict)
+                    format = "Hourly"
+                elif self.dailyButton.isChecked():
+                    dataDict = func.getDaily(startDate, endDate)
+                    dataString = func.dictString(dataDict)
+                    format = "Daily"
+                elif self.weeklyButton.isChecked():
+                    dataDict = func.getWeekly(startDate, endDate)
+                    dataString = func.dictStringWeekly(dataDict)
+                    format = "Weekly"
+                elif self.monthlyButton.isChecked():
+                    dataDict = func.getMonthly(startDate, endDate)
+                    dataString = func.dictStringMonthly(dataDict)
+                    format = "Monthly"
 
 
-            # Create readout tab
-            self.tab1 = QWidget()
-            self.tabs.addTab(self.tab1, format + " Readout")
-            usageText = QTextEdit(self)
-            usageText.setReadOnly(True)
-            usageText.setFont(font)
-            usageText.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            usageText.setText(dataString)
-
-            readOutLayout = QVBoxLayout()
-            readOutLayout.addWidget(usageText)
-            self.tab1.setLayout(readOutLayout)
-
-            # Create graph tab
-            
-            if self.hourlyButton.isChecked():
-                self.tab2 = QWidget()
-                self.tabs.addTab(self.tab2, format + " Graph")
-
-                x, y1, = func.dictList(dataDict)
-
-                # Convert datetime.datetime objs to timestamps
-                x_timestamp = [dateHour.timestamp() for dateHour in x]
-                
-                # Create plot & set atributes
-                graph = pg.PlotWidget()
-                graph.showGrid(x=True, y=True)
-                graph.setLabel('bottom', (startDate + endDate))
-                graph.setLabel('left', 'Power Usage (KWh)')
-
-                # Create dropdown menu to selelct the max Y value for the graph
-                maxYselector = QComboBox()
-                maxYselector.addItems(['0.1', '0.2', '0.3', '0.4', '0.5', '1', '2', '3', '4', '5'])
-
-                # Get max value for Y axis
-                maxVal = 0
-                for val in dataDict.values():
-                    if val / 1000 > maxVal:
-                        maxVal = val / 1000
-                
-                # Create an auto-resize button for Y-axis
-                autoResizeButton = QPushButton('Auto \nResize')
-                autoResizeButton.setFont(font)
-                autoResizeButton.clicked.connect(lambda: graph.setYRange(0, maxVal))
-
-                # Set parameters for graph X-axis
-                axis = pg.DateAxisItem()
-                graph.setAxisItems({'bottom': axis})
-                barGraph = pg.BarGraphItem(x=x_timestamp, height=y1, width=850, brush='c')
-                graph.addItem(barGraph)
-
-                maxYselector.currentIndexChanged.connect(lambda: graph.setYRange(0, float(maxYselector.currentText())))
-
-
-                # Assign layouts
-                mainGraphLayout = QHBoxLayout()
-                graphLayout = QVBoxLayout()
-                setterLayout = QVBoxLayout()
-                graphLayout.addWidget(graph)
-                setterLayout.addWidget(autoResizeButton)
-                setterLayout.addWidget(maxYselector)
-                setterLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                mainGraphLayout.addLayout(graphLayout)
-                mainGraphLayout.addLayout(setterLayout)
-                self.tab2.setLayout(mainGraphLayout)
-
-            elif self.dailyButton.isChecked():
-
-                self.tab2 = QWidget()
-                self.tabs.addTab(self.tab2, format + " Graph")
-
-                x, y1 = func.dictList(dataDict)
-
-                # Convert datetime.date objects to floating point numbers
-                #GET RID OF THE FROMORDINAL() BULLSHIT
-                x_timestamp = [datetime.datetime.fromordinal(date.toordinal()).timestamp() for date in x]
-
-                graph = pg.PlotWidget()
-                graph.showGrid(x=True, y=True)
-                graph.setLabel('bottom', (pullDate + ' - present'))
-                graph.setLabel('left', 'Power Usage (KWh)')
-
-                # Create dropdown menu to selelct the max Y value for the graph
-                maxYselector = QComboBox()
-                maxYselector.addItems(['0.1', '0.2', '0.3', '0.4', '0.5', '1', '2', '3', '4', '5'])
-
-                # Get max value for Y axis
-                maxVal = 0
-                for val in dataDict.values():
-                    if val / 1000 > maxVal:
-                        maxVal = val / 1000
-
-                # Create an auto-resize button for Y-axis
-                autoResizeButton = QPushButton('Auto \nResize')
-                autoResizeButton.setFont(font)
-                autoResizeButton.clicked.connect(lambda: graph.setYRange(0, maxVal))
-
-                # Set parameters for graph x-axis
-                axis = pg.DateAxisItem()
-                graph.setAxisItems({'bottom': axis})
-                barGraph = pg.BarGraphItem(x=x_timestamp, height=y1, width=15000, brush='c')
-                graph.addItem(barGraph)
-
-                maxYselector.currentIndexChanged.connect(lambda: graph.setYRange(0, float(maxYselector.currentText())))
-
-
-                # Assign layouts
-                mainGraphLayout = QHBoxLayout()
-                graphLayout = QVBoxLayout()
-                setterLayout = QVBoxLayout()
-                graphLayout.addWidget(graph)
-                setterLayout.addWidget(autoResizeButton)
-                setterLayout.addWidget(maxYselector)
-                setterLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                mainGraphLayout.addLayout(graphLayout)
-                mainGraphLayout.addLayout(setterLayout)
-                self.tab2.setLayout(mainGraphLayout)
-
-            elif self.weeklyButton.isChecked():
-                self.tab2 = QWidget()
-                self.tabs.addTab(self.tab2, format + " Graph")
-
-                xTuple, ytemp = func.dictList(dataDict)
-                y1 = [val / 1000 for val in ytemp]
-
-
-                x = [datetime.datetime.strptime(f'{year}-{week}-4', '%Y-%W-%w').date() for year, week in xTuple]
-
-
-                # Convert datetime.date objects to floating point numbers
-                x_timestamp = [datetime.datetime.fromordinal(date.toordinal()).timestamp() for date in x]
-
-                graph = pg.PlotWidget()
-                graph.showGrid(x=True, y=True)
-                graph.setLabel('bottom', (pullDate + ' - present'))
-                graph.setLabel('left', 'Power Usage (KWh)')
-
-                # Create dropdown menu to selelct the max Y value for the graph
-                maxYselector = QComboBox()
-                maxYselector.addItems(['0.1', '0.2', '0.3', '0.4', '0.5', '1', '2', '3', '4', '5'])
-
-                # Get max value for Y axis
-                maxVal = 0
-                for val in dataDict.values():
-                    if val / 1000 > maxVal:
-                        maxVal = val / 1000
-
-                # Create an auto-resize button for Y-axis
-                autoResizeButton = QPushButton('Auto \nResize')
-                autoResizeButton.setFont(font)
-                autoResizeButton.clicked.connect(lambda: graph.setYRange(0, maxVal))
-
-                # Set parameters for graph x-axis
-                axis = pg.DateAxisItem()
-                graph.setAxisItems({'bottom': axis})
-                barGraph = pg.BarGraphItem(x=x_timestamp, height=y1, width=525000, brush='c')
-                graph.addItem(barGraph)
-
-                maxYselector.currentIndexChanged.connect(lambda: graph.setYRange(0, float(maxYselector.currentText())))
-
-
-                # Assign layouts
-                mainGraphLayout = QHBoxLayout()
-                graphLayout = QVBoxLayout()
-                setterLayout = QVBoxLayout()
-                graphLayout.addWidget(graph)
-                setterLayout.addWidget(autoResizeButton)
-                setterLayout.addWidget(maxYselector)
-                setterLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                mainGraphLayout.addLayout(graphLayout)
-                mainGraphLayout.addLayout(setterLayout)
-                self.tab2.setLayout(mainGraphLayout)
-
-            elif self.monthlyButton.isChecked():
-                self.tab2 = QWidget()
-                self.tabs.addTab(self.tab2, format + " Graph")
-
-                x, y1 = func.dictList(dataDict)
-
-
-
-
-
-                # Convert datetime.date objects to floating point numbers
-                #GET RID OF THE FROMORDINAL() BULLSHIT
-                x_timestamp = [datetime.datetime.fromordinal(date.toordinal()).timestamp() for date in x]
-
-                graph = pg.PlotWidget()
-                graph.showGrid(x=True, y=True)
-                graph.setLabel('bottom', (pullDate + ' - present'))
-                graph.setLabel('left', 'Power Usage (KWh)')
-
-                # Create dropdown menu to selelct the max Y value for the graph
-                maxYselector = QComboBox()
-                maxYselector.addItems(['0.1', '0.2', '0.3', '0.4', '0.5', '1', '2', '3', '4', '5'])
-
-                # Get max value for Y axis
-                maxVal = 0
-                for val in dataDict.values():
-                    if val / 1000 > maxVal:
-                        maxVal = val / 1000
-
-                # Create an auto-resize button for Y-axis
-                autoResizeButton = QPushButton('Auto \nResize')
-                autoResizeButton.setFont(font)
-                autoResizeButton.clicked.connect(lambda: graph.setYRange(0, maxVal))
-
-                # Set parameters for graph x-axis
-                axis = pg.DateAxisItem()
-                graph.setAxisItems({'bottom': axis})
-                barGraph = pg.BarGraphItem(x=x_timestamp, height=y1, width=150000, brush='c')
-                graph.addItem(barGraph)
-
-                maxYselector.currentIndexChanged.connect(lambda: graph.setYRange(0, float(maxYselector.currentText())))
-
-
-                # Assign layouts
-                mainGraphLayout = QHBoxLayout()
-                graphLayout = QVBoxLayout()
-                setterLayout = QVBoxLayout()
-                graphLayout.addWidget(graph)
-                setterLayout.addWidget(autoResizeButton)
-                setterLayout.addWidget(maxYselector)
-                setterLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                mainGraphLayout.addLayout(graphLayout)
-                mainGraphLayout.addLayout(setterLayout)
-                self.tab2.setLayout(mainGraphLayout)
-
-
-            # except Exception as e:
-            #     s = str(e)
-            #     excType, excObj, excTb = sys.exc_info()
-            #     fname = os.path.split(excTb.tb_frame.f_code.co_filename)[1]
-            #     # Create errorer message window
-            #     errorBox = QMessageBox()
-            #     if s == "list index out of range":
-            #         errorBox.setText(s + "\nDue to the goofy way in which Wyze groups their data,\nsame day start and end dates my return unexpected results\nor in this case, an error. Please try again with different dates.")
-            #         errorBox.exec()
-            #     else:
-            #         errorBox.setText(s + "\n" + str(excType) + "\n" + fname + "\n" + str(excTb.tb_lineno))
-            #         errorBox.exec()
-            #     print(sys.exc_info())
-                
-
-
-
-                # self.errorLabel = QLabel(Exception.args[0])
-                # print(Exception.args[0])
-                # self.errorLabel.setFont(errorFont)
-                # self.errorLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                # self.tab1.layout().addWidget(self.errorLabel)
-
-            def testFunc(self):
-                # ARGUMENTS NEEDED: (PULL STARTDATE, PULL ENDDATE, (DATA FORMATED DAILY, WEEKLY, OR MONTHLY))
-                # Collate hourly data
-                dataDict = func.getHourly(pullDate)
-                dataString = func.dictStringHourly(dataDict)
-
-                # Create hourly readout tab
-                self.tab4 = QWidget()
-                self.tabs.addTab(self.tab4, "Hourly Printout")
+                # Create readout tab
+                self.tab1 = QWidget()
+                self.tabs.addTab(self.tab1, format + " Readout")
                 usageText = QTextEdit(self)
                 usageText.setReadOnly(True)
                 usageText.setFont(font)
@@ -498,59 +265,247 @@ try:
 
                 readOutLayout = QVBoxLayout()
                 readOutLayout.addWidget(usageText)
-                self.tab4.setLayout(readOutLayout)
+                self.tab1.setLayout(readOutLayout)
 
-                # Create hourly graph tab
-                self.tab5 = QWidget()
-                self.tabs.addTab(self.tab5, "Hourly Graph")
+                # Create graph tab
+                
+                if self.hourlyButton.isChecked():
+                    self.tab2 = QWidget()
+                    self.tabs.addTab(self.tab2, format + " Graph")
 
-                x, y1 = func.dictList(dataDict)
+                    x, y1, = func.dictList(dataDict)
 
-                # Convert datetime.datetime objects to timestamps
-                x_timestamp = [dateHour.timestamp() for dateHour in x]
+                    # Convert datetime.datetime objs to timestamps
+                    x_timestamp = [dateHour.timestamp() for dateHour in x]
+                    
+                    # Create plot & set atributes
+                    graph = pg.PlotWidget()
+                    graph.showGrid(x=True, y=True)
+                    graph.setLabel('bottom', (startDate + endDate))
+                    graph.setLabel('left', 'Power Usage (KWh)')
 
-                graph = pg.PlotWidget()
-                graph.showGrid(x=True, y=True)
-                graph.setLabel('bottom', (pullDate + ' - present'))
-                graph.setLabel('left', 'Power Usage (KWh)')
+                    # Create dropdown menu to selelct the max Y value for the graph
+                    maxYselector = QComboBox()
+                    maxYselector.addItems(['0.1', '0.2', '0.3', '0.4', '0.5', '1', '2', '3', '4', '5'])
 
-                # Create a dropdown menu to select the max Y value for the graph
-                maxYselector = QComboBox()
-                maxYselector.addItems(['0.5', '1', '2', '3', '4', '5'])
+                    # Get max value for Y axis
+                    maxVal = 0
+                    for val in dataDict.values():
+                        if val / 1000 > maxVal:
+                            maxVal = val / 1000
+                    
+                    # Create an auto-resize button for Y-axis
+                    autoResizeButton = QPushButton('Auto \nResize')
+                    autoResizeButton.setFont(font)
+                    autoResizeButton.clicked.connect(lambda: graph.setYRange(0, maxVal))
 
-                # Get the max value for the Y axis
-                maxVal = 0
-                for val in dataDict.values():
-                    if val / 1000 > maxVal:
-                        maxVal = val / 1000
-                print(maxVal)
+                    # Set parameters for graph X-axis
+                    axis = pg.DateAxisItem()
+                    graph.setAxisItems({'bottom': axis})
+                    barGraph = pg.BarGraphItem(x=x_timestamp, height=y1, width=850, brush='c')
+                    graph.addItem(barGraph)
 
-                # Create an auto-resize button for y-axis
-                autoResizeButton = QPushButton("Resize")
-                autoResizeButton.setFont(font)
-                autoResizeButton.clicked.connect(lambda: graph.setYRange(0, maxVal))
+                    maxYselector.currentIndexChanged.connect(lambda: graph.setYRange(0, float(maxYselector.currentText())))
 
-                # Set parameters for graph x-axis
-                axis = pg.DateAxisItem()
-                graph.setAxisItems({'bottom': axis})
-                barGraph = pg.BarGraphItem(x=x_timestamp, height=y1, width=850, brush='c')
-                graph.addItem(barGraph)
 
-                maxYselector.currentIndexChanged.connect(lambda: graph.setYRange(0, float(maxYselector.currentText())))
+                    # Assign layouts
+                    mainGraphLayout = QHBoxLayout()
+                    graphLayout = QVBoxLayout()
+                    setterLayout = QVBoxLayout()
+                    graphLayout.addWidget(graph)
+                    setterLayout.addWidget(autoResizeButton)
+                    setterLayout.addWidget(maxYselector)
+                    setterLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                    mainGraphLayout.addLayout(graphLayout)
+                    mainGraphLayout.addLayout(setterLayout)
+                    self.tab2.setLayout(mainGraphLayout)
 
+                elif self.dailyButton.isChecked():
+
+                    self.tab2 = QWidget()
+                    self.tabs.addTab(self.tab2, format + " Graph")
+
+                    x, y1 = func.dictList(dataDict)
+
+                    # Convert datetime.date objects to floating point numbers
+                    #GET RID OF THE FROMORDINAL() BULLSHIT
+                    x_timestamp = [datetime.datetime.fromordinal(date.toordinal()).timestamp() for date in x]
+
+                    graph = pg.PlotWidget()
+                    graph.showGrid(x=True, y=True)
+                    graph.setLabel('bottom', (pullDate + ' - present'))
+                    graph.setLabel('left', 'Power Usage (KWh)')
+
+                    # Create dropdown menu to selelct the max Y value for the graph
+                    maxYselector = QComboBox()
+                    maxYselector.addItems(['0.1', '0.2', '0.3', '0.4', '0.5', '1', '2', '3', '4', '5'])
+
+                    # Get max value for Y axis
+                    maxVal = 0
+                    for val in dataDict.values():
+                        if val / 1000 > maxVal:
+                            maxVal = val / 1000
+
+                    # Create an auto-resize button for Y-axis
+                    autoResizeButton = QPushButton('Auto \nResize')
+                    autoResizeButton.setFont(font)
+                    autoResizeButton.clicked.connect(lambda: graph.setYRange(0, maxVal))
+
+                    # Set parameters for graph x-axis
+                    axis = pg.DateAxisItem()
+                    graph.setAxisItems({'bottom': axis})
+                    barGraph = pg.BarGraphItem(x=x_timestamp, height=y1, width=15000, brush='c')
+                    graph.addItem(barGraph)
+
+                    maxYselector.currentIndexChanged.connect(lambda: graph.setYRange(0, float(maxYselector.currentText())))
+
+
+                    # Assign layouts
+                    mainGraphLayout = QHBoxLayout()
+                    graphLayout = QVBoxLayout()
+                    setterLayout = QVBoxLayout()
+                    graphLayout.addWidget(graph)
+                    setterLayout.addWidget(autoResizeButton)
+                    setterLayout.addWidget(maxYselector)
+                    setterLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                    mainGraphLayout.addLayout(graphLayout)
+                    mainGraphLayout.addLayout(setterLayout)
+                    self.tab2.setLayout(mainGraphLayout)
+
+                elif self.weeklyButton.isChecked():
+                    self.tab2 = QWidget()
+                    self.tabs.addTab(self.tab2, format + " Graph")
+
+                    xTuple, ytemp = func.dictList(dataDict)
+                    y1 = [val / 1000 for val in ytemp]
+
+
+                    x = [datetime.datetime.strptime(f'{year}-{week}-4', '%Y-%W-%w').date() for year, week in xTuple]
+
+
+                    # Convert datetime.date objects to floating point numbers
+                    x_timestamp = [datetime.datetime.fromordinal(date.toordinal()).timestamp() for date in x]
+
+                    graph = pg.PlotWidget()
+                    graph.showGrid(x=True, y=True)
+                    graph.setLabel('bottom', (pullDate + ' - present'))
+                    graph.setLabel('left', 'Power Usage (KWh)')
+
+                    # Create dropdown menu to selelct the max Y value for the graph
+                    maxYselector = QComboBox()
+                    maxYselector.addItems(['0.1', '0.2', '0.3', '0.4', '0.5', '1', '2', '3', '4', '5'])
+
+                    # Get max value for Y axis
+                    maxVal = 0
+                    for val in dataDict.values():
+                        if val / 1000 > maxVal:
+                            maxVal = val / 1000
+
+                    # Create an auto-resize button for Y-axis
+                    autoResizeButton = QPushButton('Auto \nResize')
+                    autoResizeButton.setFont(font)
+                    autoResizeButton.clicked.connect(lambda: graph.setYRange(0, maxVal))
+
+                    # Set parameters for graph x-axis
+                    axis = pg.DateAxisItem()
+                    graph.setAxisItems({'bottom': axis})
+                    barGraph = pg.BarGraphItem(x=x_timestamp, height=y1, width=525000, brush='c')
+                    graph.addItem(barGraph)
+
+                    maxYselector.currentIndexChanged.connect(lambda: graph.setYRange(0, float(maxYselector.currentText())))
+
+
+                    # Assign layouts
+                    mainGraphLayout = QHBoxLayout()
+                    graphLayout = QVBoxLayout()
+                    setterLayout = QVBoxLayout()
+                    graphLayout.addWidget(graph)
+                    setterLayout.addWidget(autoResizeButton)
+                    setterLayout.addWidget(maxYselector)
+                    setterLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                    mainGraphLayout.addLayout(graphLayout)
+                    mainGraphLayout.addLayout(setterLayout)
+                    self.tab2.setLayout(mainGraphLayout)
+
+                elif self.monthlyButton.isChecked():
+                    self.tab2 = QWidget()
+                    self.tabs.addTab(self.tab2, format + " Graph")
+
+                    x, y1 = func.dictList(dataDict)
+
+
+
+
+
+                    # Convert datetime.date objects to floating point numbers
+                    #GET RID OF THE FROMORDINAL() BULLSHIT
+                    x_timestamp = [datetime.datetime.fromordinal(date.toordinal()).timestamp() for date in x]
+
+                    graph = pg.PlotWidget()
+                    graph.showGrid(x=True, y=True)
+                    graph.setLabel('bottom', (pullDate + ' - present'))
+                    graph.setLabel('left', 'Power Usage (KWh)')
+
+                    # Create dropdown menu to selelct the max Y value for the graph
+                    maxYselector = QComboBox()
+                    maxYselector.addItems(['0.1', '0.2', '0.3', '0.4', '0.5', '1', '2', '3', '4', '5'])
+
+                    # Get max value for Y axis
+                    maxVal = 0
+                    for val in dataDict.values():
+                        if val / 1000 > maxVal:
+                            maxVal = val / 1000
+
+                    # Create an auto-resize button for Y-axis
+                    autoResizeButton = QPushButton('Auto \nResize')
+                    autoResizeButton.setFont(font)
+                    autoResizeButton.clicked.connect(lambda: graph.setYRange(0, maxVal))
+
+                    # Set parameters for graph x-axis
+                    axis = pg.DateAxisItem()
+                    graph.setAxisItems({'bottom': axis})
+                    barGraph = pg.BarGraphItem(x=x_timestamp, height=y1, width=150000, brush='c')
+                    graph.addItem(barGraph)
+
+                    maxYselector.currentIndexChanged.connect(lambda: graph.setYRange(0, float(maxYselector.currentText())))
+
+
+                    # Assign layouts
+                    mainGraphLayout = QHBoxLayout()
+                    graphLayout = QVBoxLayout()
+                    setterLayout = QVBoxLayout()
+                    graphLayout.addWidget(graph)
+                    setterLayout.addWidget(autoResizeButton)
+                    setterLayout.addWidget(maxYselector)
+                    setterLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                    mainGraphLayout.addLayout(graphLayout)
+                    mainGraphLayout.addLayout(setterLayout)
+                    self.tab2.setLayout(mainGraphLayout)
+
+
+            except Exception as e:
+                s = str(e)
+                excType, excObj, excTb = sys.exc_info()
+                fname = os.path.split(excTb.tb_frame.f_code.co_filename)[1]
+                # Create errorer message window
+                errorBox = QMessageBox()
+                if s == "list index out of range":
+                    errorBox.setText(s + "\nDue to the goofy way in which Wyze groups their data,\nsame day start and end dates my return unexpected results\nor in this case, an error. Please try again with different dates.")
+                    errorBox.exec()
+                else:
+                    errorBox.setText(s + "\n" + str(excType) + "\n" + fname + "\n" + str(excTb.tb_lineno))
+                    errorBox.exec()
+                print(sys.exc_info())
                 
 
 
-                mainGraphLayout = QHBoxLayout()
-                graphLayout = QVBoxLayout()
-                setterLayout = QVBoxLayout()
-                graphLayout.addWidget(graph)
-                setterLayout.addWidget(autoResizeButton)
-                setterLayout.addWidget(maxYselector)
-                setterLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                mainGraphLayout.addLayout(graphLayout)
-                mainGraphLayout.addLayout(setterLayout)
-                self.tab5.setLayout(mainGraphLayout)
+
+                self.errorLabel = QLabel(Exception.args[0])
+                print(Exception.args[0])
+                self.errorLabel.setFont(errorFont)
+                self.errorLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                self.tab1.layout().addWidget(self.errorLabel)
+
 
         def removeTab(self, index):
             self.tabs.removeTab(index)
@@ -562,6 +517,8 @@ try:
             self.setWindowTitle("Wyze Data Portal - Device List")
             self.setGeometry(xCoord - 90, yCoord - 10, 600, 400)
             self.setContentsMargins(20, 20, 20, 20)
+            self.setWindowIcon(QIcon('Widgets/WyzeLogo.PNG'))
+
             mainLayout = QHBoxLayout()
             leftLayout = QVBoxLayout()
             leftLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
@@ -641,6 +598,7 @@ try:
             self.setGeometry(350,150,400,400)
             self.setContentsMargins(20,20,20,20)
             self.UI()
+            self.setWindowIcon(QIcon('Widgets/WyzeLogo.PNG'))
 
 
         def UI(self):
