@@ -18,24 +18,13 @@ from PyQt6.QtGui import QIcon
 
 
 
-# PEAK HOURS USER SELECTION IS NOT FUNCTIONAL
-
-
 #Set date to pull data from
 pullDate = '2024-04-01'
-
-
-    # email = 'mperry120@gmail.com',
-    # password = 'ziJfym-fodsaq-ribwo6',
-    # key_id ='0cf980f9-364e-44a5-9471-8ac8ec5fb6ff',
-    # api_key = 'XLMyd6F1Zs92SedNfGCrEs4a2l2oHnNwnMQx1YPxN9h2TZXR23gwz8avWYN7')
 
 font = QFont("Courier", 10)
 errorFont = QFont("Times", 12, QFont.Weight.Bold)
 
 try:
-
-
 
     class usageWindow(QWidget):
         def __init__(self, mac, xCoord, yCoord):
@@ -58,7 +47,6 @@ try:
                 self.setLayout(mainLayout)
                 self.show()
 
-            
             else:
                 self.setWindowTitle("Wyze Data Portal - Power Usage")
                 self.setGeometry(xCoord + 220, yCoord + 30, 600, 400)
@@ -70,13 +58,7 @@ try:
                 self.tabs.setTabsClosable(True)
                 self.tabs.tabCloseRequested.connect(self.removeTab)
                 self.tab1 = QWidget()
-                # self.tab2 = QWidget()
-                # self.tab3 = QWidget()
                 self.tabs.addTab(self.tab1, "Settings")
-                # self.tabs.addTab(self.tab2, "ReadOut")
-                # self.tabs.addTab(self.tab3, "Graph")
-
-
 
                 #Settings Tab
                 settingsLayout = QHBoxLayout()
@@ -88,7 +70,6 @@ try:
                 settingsLayout.addLayout(rightLayout)
                 leftLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 rightLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
 
                 #Center Layout
                 #Layout structure:
@@ -111,7 +92,7 @@ try:
                 centerVLayout.addLayout(centerVHLayout3)
                 centerLayout.addLayout(centerVLayout)
 
-                instructions = QLabel("Select dates for the data pull\nand choose the data format")
+                instructions = QLabel("Select dates and\n choose format")
                 instructions.setFont(font)
                 centerVHLayout1.addWidget(instructions)
                 centerVHLayout1.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -144,15 +125,15 @@ try:
                 centerVvLayout1.addWidget(self.monthlyButton)
 
                 #Create Start/End date labels and date selectors
-                peakHourStart = QComboBox()
-                peakHourStop = QComboBox()
+                self.peakHourStart = QComboBox()
+                self.peakHourStop = QComboBox()
                 for i in range(0, 24):
-                    peakHourStart.addItem(str(i))
-                    peakHourStop.addItem(str(i))
-                centerVvLayout1.addWidget(peakHourStart)
-                centerVvLayout1.addWidget(peakHourStop)
-                peakHourStart.setCurrentIndex(16)
-                peakHourStop.setCurrentIndex(20)
+                    self.peakHourStart.addItem(str(i))
+                    self.peakHourStop.addItem(str(i))
+                centerVvLayout1.addWidget(self.peakHourStart)
+                centerVvLayout1.addWidget(self.peakHourStop)
+                self.peakHourStart.setCurrentIndex(16)
+                self.peakHourStop.setCurrentIndex(21)
                 peakStartHBox = QHBoxLayout()
                 peakStopHBox = QHBoxLayout()
                 peakHoursLabelHbox = QHBoxLayout()
@@ -160,9 +141,9 @@ try:
                 peakHoursLabel.setFont(font)
                 peakHoursLabelHbox.addWidget(peakHoursLabel)
                 peakStartHBox.addWidget(QLabel("Start"))
-                peakStartHBox.addWidget(peakHourStart)
+                peakStartHBox.addWidget(self.peakHourStart)
                 peakStopHBox.addWidget(QLabel("End"))
-                peakStopHBox.addWidget(peakHourStop)
+                peakStopHBox.addWidget(self.peakHourStop)
                 peakHoursLabelHbox.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 centerVvLayout1.addSpacing(20)
                 centerVvLayout1.addLayout(peakHoursLabelHbox)
@@ -175,8 +156,6 @@ try:
                 centerVHLayout3.addWidget(enterButton1)
                 centerVHLayout3.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 enterButton1.setMaximumWidth(100)
-
-
 
                 #Left Layout
                 startDateLabel = QLabel("Start Date")
@@ -191,7 +170,6 @@ try:
                 self.startDate.setMaximumDate(QDate.currentDate())
                 leftLayout.addWidget(self.startDate)
 
-
                 #Right Layout
                 startDateLabel = QLabel("End Date")
                 startDateLabel.setFont(font)
@@ -204,8 +182,6 @@ try:
                 self.endDate.setFixedWidth(200)
                 self.endDate.setMaximumDate(QDate.currentDate())
                 rightLayout.addWidget(self.endDate)
-
-
 
                 # Enter button clicked
                 enterButton1.clicked.connect(self.checkDates)
@@ -232,27 +208,25 @@ try:
             else:
                 self.createTabs(self.startDate.date().toString('yyyy-MM-dd'), self.endDate.date().toString('yyyy-MM-dd'))
 
-
         def createTabs(self, startDate, endDate):
             try:
                 format = None
                 if self.hourlyButton.isChecked():
-                    dataDict = func.getHourly(startDate, endDate)
+                    dataDict = func.getHourly(startDate, endDate, self.peakHourStart.currentIndex(), self.peakHourStop.currentIndex())
                     dataString = func.dictStringHourly(dataDict)
                     format = "Hourly"
                 elif self.dailyButton.isChecked():
-                    dataDict = func.getDaily(startDate, endDate)
+                    dataDict = func.getDaily(startDate, endDate, self.peakHourStart.currentIndex(), self.peakHourStop.currentIndex())
                     dataString = func.dictString(dataDict)
                     format = "Daily"
                 elif self.weeklyButton.isChecked():
-                    dataDict = func.getWeekly(startDate, endDate)
+                    dataDict = func.getWeekly(startDate, endDate, self.peakHourStart.currentIndex(), self.peakHourStop.currentIndex())
                     dataString = func.dictStringWeekly(dataDict)
                     format = "Weekly"
                 elif self.monthlyButton.isChecked():
-                    dataDict = func.getMonthly(startDate, endDate)
+                    dataDict = func.getMonthly(startDate, endDate, self.peakHourStart.currentIndex(), self.peakHourStop.currentIndex())
                     dataString = func.dictStringMonthly(dataDict)
                     format = "Monthly"
-
 
                 # Create readout tab
                 self.tab1 = QWidget()
@@ -268,7 +242,6 @@ try:
                 self.tab1.setLayout(readOutLayout)
 
                 # Create graph tab
-                
                 if self.hourlyButton.isChecked():
                     self.tab2 = QWidget()
                     self.tabs.addTab(self.tab2, format + " Graph")
@@ -306,7 +279,6 @@ try:
                     graph.addItem(barGraph)
 
                     maxYselector.currentIndexChanged.connect(lambda: graph.setYRange(0, float(maxYselector.currentText())))
-
 
                     # Assign layouts
                     mainGraphLayout = QHBoxLayout()
@@ -359,7 +331,6 @@ try:
 
                     maxYselector.currentIndexChanged.connect(lambda: graph.setYRange(0, float(maxYselector.currentText())))
 
-
                     # Assign layouts
                     mainGraphLayout = QHBoxLayout()
                     graphLayout = QVBoxLayout()
@@ -378,10 +349,7 @@ try:
 
                     xTuple, ytemp = func.dictList(dataDict)
                     y1 = [val / 1000 for val in ytemp]
-
-
                     x = [datetime.datetime.strptime(f'{year}-{week}-4', '%Y-%W-%w').date() for year, week in xTuple]
-
 
                     # Convert datetime.date objects to floating point numbers
                     x_timestamp = [datetime.datetime.fromordinal(date.toordinal()).timestamp() for date in x]
@@ -414,7 +382,6 @@ try:
 
                     maxYselector.currentIndexChanged.connect(lambda: graph.setYRange(0, float(maxYselector.currentText())))
 
-
                     # Assign layouts
                     mainGraphLayout = QHBoxLayout()
                     graphLayout = QVBoxLayout()
@@ -432,10 +399,6 @@ try:
                     self.tabs.addTab(self.tab2, format + " Graph")
 
                     x, y1 = func.dictList(dataDict)
-
-
-
-
 
                     # Convert datetime.date objects to floating point numbers
                     #GET RID OF THE FROMORDINAL() BULLSHIT
@@ -469,7 +432,6 @@ try:
 
                     maxYselector.currentIndexChanged.connect(lambda: graph.setYRange(0, float(maxYselector.currentText())))
 
-
                     # Assign layouts
                     mainGraphLayout = QHBoxLayout()
                     graphLayout = QVBoxLayout()
@@ -496,9 +458,6 @@ try:
                     errorBox.setText(s + "\n" + str(excType) + "\n" + fname + "\n" + str(excTb.tb_lineno))
                     errorBox.exec()
                 print(sys.exc_info())
-                
-
-
 
                 self.errorLabel = QLabel(Exception.args[0])
                 print(Exception.args[0])
@@ -509,7 +468,6 @@ try:
 
         def removeTab(self, index):
             self.tabs.removeTab(index)
-
 
     class deviceListWindow(QWidget):
         def __init__(self, xCoord, yCoord):
@@ -557,9 +515,6 @@ try:
             self.macAddress.setPlaceholderText("Mac Address")
             if func.is_remembered("SaveData.txt"):
                 self.macAddress.setText(func.get_last_mac("SaveData.txt"))
-            
-
-            
 
             enterButton = QPushButton("Enter")
             enterButton.setFont(font)
@@ -573,7 +528,6 @@ try:
             rightLayout.setAlignment(Qt.AlignmentFlag.AlignBottom)
             self.setLayout(mainLayout)
 
-        
         def getUsageData(self):
             #append lineToWrite to SaveData.txt
             if func.is_remembered("SaveData.txt"):
@@ -600,7 +554,6 @@ try:
             self.UI()
             self.setWindowIcon(QIcon('Widgets/WyzeLogo.PNG'))
 
-
         def UI(self):
             self.mainLayout = QVBoxLayout()
             TopLayout = QVBoxLayout()
@@ -622,7 +575,6 @@ try:
             self.api_key.setPlaceholderText("API Key")
             self.api_key.setFixedWidth(200)
             button = QPushButton("Enter")
-
 
             ThBox1 = QHBoxLayout()
             ThBox2 = QHBoxLayout()
@@ -651,16 +603,6 @@ try:
             hBox.addWidget(button, alignment=Qt.AlignmentFlag.AlignLeft)
             BottomLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
-
-
-
-
-
-            # self.image = QLabel(self)
-            # self.image.setPixmap(QPixmap('Widgets/WyzeLogo.PNG'))
-            # self.image.setScaledContents(True)
-
-
             image = QLabel(self)
             pixmap = QPixmap('Widgets/WyzeLogo.PNG')
             scaled_pixmap = pixmap.scaled(50, 50)
@@ -668,7 +610,6 @@ try:
             logoHBox = QHBoxLayout()
             logoHBox.addWidget(image, alignment=Qt.AlignmentFlag.AlignCenter)
             BottomLayout.addLayout(logoHBox)
-
 
             # Create discriptive link to Wyze API Key page
             hBox2 = QHBoxLayout()
@@ -680,7 +621,6 @@ try:
             wyzeLink.setText('<a href="https://developer-api-console.wyze.com/#/apikey/view">Wyze API Key</a>')
             wyzeLink.setAlignment(Qt.AlignmentFlag.AlignCenter)
             hBox3.addWidget(wyzeLink)
-
             BottomLayout.addLayout(hBox2)
             BottomLayout.addLayout(hBox3)
 
@@ -701,9 +641,7 @@ try:
 
             button.clicked.connect(self.pressEnter)
 
-
             self.rememberMe.setChecked(func.get_rememberMe('SaveData.txt'))
-
 
             self.email.setText(func.get_email('SaveData.txt'))
             self.password.setText(func.get_password('SaveData.txt'))
@@ -757,11 +695,6 @@ try:
                 error_box.setText('Invalid Credentials')
                 error_box.exec()
             
-            
-            
-        
-
-
     def main():
         App=QApplication(sys.argv)
         window = Window()
@@ -769,9 +702,6 @@ try:
 
     if __name__=='__main__':
         main()
-
-
-
 
 
 except WyzeApiError as e:

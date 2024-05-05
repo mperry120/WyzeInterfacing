@@ -26,9 +26,6 @@ outdoorPlug = None
 def setPlugData(mac):
     global outdoorPlug
     outdoorPlug = client.plugs.info(device_mac= mac)
-    print('************************************')
-    print(outdoorPlug)
-    print('************************************')
     return outdoorPlug
 
     
@@ -37,12 +34,11 @@ def setPlugData(mac):
 #NEED EXCEPTION HANDLING
 def getUsageData(date):
     #Assignes electrical usage records to "PlugRecords" Var
-    print(outdoorPlug.mac)
     PlugRecords = client.plugs.get_usage_records(device_mac=outdoorPlug.mac, device_model=outdoorPlug.product.model, start_time=datetime.datetime.fromisoformat(date))
     return PlugRecords
 
 #Returns hourly usage dict of format: {datetime.datetime: int}
-def getHourly(date, endDate):
+def getHourly(date, endDate, peakS, peakE):
     #changes
     startDate = datetime.datetime.strptime(date, '%Y-%m-%d')
     dayDelta = datetime.timedelta(days=1)
@@ -61,7 +57,7 @@ def getHourly(date, endDate):
     for wyzeRec in plugRecs:
         for date, value in wyzeRec.hourly_data.items():
             if date <= eDate and date >= sDate:
-                if date.hour >= 16 and date.hour <= 21:
+                if date.hour >= peakS and date.hour <= peakE:
                     onPeakTotal += value
                 else:
                     offPeakTotal += value
@@ -71,7 +67,7 @@ def getHourly(date, endDate):
     return newDict
 
 #Returns daily usage dict of format: {datetime.date: int}
-def getDaily(date, endDate):
+def getDaily(date, endDate, peakS, peakE):
     startDate = datetime.datetime.strptime(date, '%Y-%m-%d')
     dayDelta = datetime.timedelta(days=1)
     pullDate = startDate - dayDelta
@@ -89,7 +85,7 @@ def getDaily(date, endDate):
         for date, value in wyzeRec.hourly_data.items():
             if date <= eDate and date >= sDate:
                 #Aggragate peak and offPeak hour values
-                if date.hour >= 16 and date.hour <= 21:
+                if date.hour >= peakS and date.hour <= peakE:
                     onPeakTotal += value
                 else:
                     offPeakTotal += value
@@ -101,7 +97,7 @@ def getDaily(date, endDate):
     return newDict
 
 #Returns weekly usage dict of format: {(datetime.date, datetime.date): int}
-def getWeekly(date, endDate):
+def getWeekly(date, endDate, peakS, peakE):
     startDate = datetime.datetime.strptime(date, '%Y-%m-%d')
     dayDelta = datetime.timedelta(days=1)
     pullDate = startDate - dayDelta
@@ -115,7 +111,7 @@ def getWeekly(date, endDate):
     for wyzeRec in plugRecs:
         for date, value in wyzeRec.hourly_data.items():
             if date <= eDate and date >= sDate:
-                if date.hour >= 16 and date.hour <= 21:
+                if date.hour >= peakS and date.hour <= peakE:
                     onPeakTotal += value
                 else:
                     offPeakTotal += value
@@ -125,7 +121,7 @@ def getWeekly(date, endDate):
     newDict['offPeak'] = offPeakTotal
     return newDict
 
-def getMonthly(date, endDate):
+def getMonthly(date, endDate, peakS, peakE):
     startDate = datetime.datetime.strptime(date, '%Y-%m-%d')
     dayDelta = datetime.timedelta(days=1)
     pullDate = startDate - dayDelta
@@ -140,7 +136,7 @@ def getMonthly(date, endDate):
         #aggragate data
         for date, value in wyzeRec.hourly_data.items():
             if date <= eDate and date >= sDate:
-                if date.hour >= 16 and date.hour <= 21:
+                if date.hour >= peakS and date.hour <= peakE:
                     onPeakTotal += value
                 else:
                     offPeakTotal += value
@@ -244,33 +240,10 @@ def dictList(dict):
 
 def getDeviceList():
     deviceListString = ""
-    DeviceList = client.devices_list()
-    print("====================================\n")
     for device in client.devices_list():
         deviceListString += (f"nickname: {device.nickname}\nis_online: {device.is_online}\nmac: {device.mac}\nproduct model: {device.product.model}\n")
         deviceListString += "\n ----- \n"
-        print(f"mac: {device.mac}")
-        print(f"nickname: {device.nickname}")
-        print(f"is_online: {device.is_online}")
-        print(f"product model: {device.product.model}")
-        print()
-    print("\n====================================\n")
     return deviceListString
-
-
-# Need to pass in device_mac
-# plug = client.plugs.info(device_mac='7C78B2647DD3-0002')
-# print("power: ", plug.is_on)
-# print("online: ", plug.is_online)
-
-# if plug.is_on:
-#     client.plugs.turn_off(device_mac=plug.mac, device_model=plug.product.model)
-#     print("Turned the plug off")
-# else:
-#     client.plugs.turn_on(device_mac=plug.mac, device_model=plug.product.model)
-#     print("Turned the plug on")
-# plug = client.plugs.info(device_mac='7C78B2647DD3-0002')
-# print(f"power: {plug.is_on}")
 
 
 #returns state of rememberMe last time user logged in
