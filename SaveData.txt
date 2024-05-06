@@ -1,0 +1,5 @@
+password: ziJfym-fodsaq-ribwo6
+key_id: 0cf980f9-364e-44a5-9471-8ac8ec5fb6ff
+api_key: XLMyd6F1Zs92SedNfGCrEs4a2l2oHnNwnMQx1YPxN9h2TZXR23gwz8avWYN7
+rememberMe: true7C78B2647DD3
+last_mac:7C78B2647DD3
