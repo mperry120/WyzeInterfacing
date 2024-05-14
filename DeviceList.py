@@ -15,6 +15,12 @@ from PyQt6.QtWidgets import QDateEdit
 import requests.exceptions
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtGui import QIcon
+from inspect import getsourcefile
+from os.path import abspath
+
+mainScriptPath = abspath(getsourcefile(lambda:0))
+rootPath = os.path.dirname(mainScriptPath)
+dataPath = os.path.join(rootPath,"data", "SaveData.txt")
 
 
 
@@ -513,8 +519,8 @@ try:
             rightLayout.addWidget(self.errorLabel)
             self.macAddress = QLineEdit(self)
             self.macAddress.setPlaceholderText("Mac Address")
-            if func.is_remembered("SaveData.txt"):
-                self.macAddress.setText(func.get_last_mac("SaveData.txt"))
+            if func.is_remembered(dataPath):
+                self.macAddress.setText(func.get_last_mac(dataPath))
 
             enterButton = QPushButton("Enter")
             enterButton.setFont(font)
@@ -530,8 +536,8 @@ try:
 
         def getUsageData(self):
             #append lineToWrite to SaveData.txt
-            if func.is_remembered("SaveData.txt"):
-                func.replaceLine("SaveData.txt", "last_mac:", self.macAddress.text())
+            if func.is_remembered(dataPath):
+                func.replaceLine(dataPath, "last_mac:", self.macAddress.text())
 
             if self.macAddress.text() != "":
 
@@ -641,26 +647,26 @@ try:
 
             button.clicked.connect(self.pressEnter)
 
-            self.rememberMe.setChecked(func.get_rememberMe('SaveData.txt'))
+            self.rememberMe.setChecked(func.get_rememberMe(dataPath))
 
-            self.email.setText(func.get_email('SaveData.txt'))
-            self.password.setText(func.get_password('SaveData.txt'))
-            self.key_id.setText(func.get_key_id('SaveData.txt'))
-            self.api_key.setText(func.get_api_key('SaveData.txt'))
+            self.email.setText(func.get_email(dataPath))
+            self.password.setText(func.get_password(dataPath))
+            self.key_id.setText(func.get_key_id(dataPath))
+            self.api_key.setText(func.get_api_key(dataPath))
 
             self.setLayout(self.mainLayout)
             self.show()
 
         def pressEnter(self):
             if self.rememberMe.isChecked():
-                if func.is_remembered("SaveData.txt"):
-                    func.replaceLine("SaveData.txt", "email:", self.email.text())
-                    func.replaceLine("SaveData.txt", "password:", self.password.text())
-                    func.replaceLine("SaveData.txt", "key_id:", self.key_id.text())
-                    func.replaceLine("SaveData.txt", "api_key:", self.api_key.text())
-                    func.replaceLine("SaveData.txt", "rememberMe:", "true")
+                if func.is_remembered(dataPath):
+                    func.replaceLine(dataPath, "email:", self.email.text())
+                    func.replaceLine(dataPath, "password:", self.password.text())
+                    func.replaceLine(dataPath, "key_id:", self.key_id.text())
+                    func.replaceLine(dataPath, "api_key:", self.api_key.text())
+                    func.replaceLine(dataPath, "rememberMe:", "true")
                 else:
-                    f = open("SaveData.txt", "w")
+                    f = open(dataPath, "w")
                     f.write("email: " + self.email.text() + "\n")
                     f.write("password: " + self.password.text() + "\n")
                     f.write("key_id: " + self.key_id.text() + "\n")
@@ -668,7 +674,7 @@ try:
                     f.write("rememberMe: true")
                     f.close()
             else:
-                f = open("SaveData.txt", "w")
+                f = open(dataPath, "w")
                 f.write("")
                 f.close()
             try:

@@ -312,7 +312,6 @@ def replaceLine(filename, oldLine, newLine):
             with open(filename, 'w') as file:
                 file.write(data)
         else:
-            data += newLine
             with open(filename, 'w') as file:
                 data += '\n' + oldLine + newLine
                 file.write(data)
